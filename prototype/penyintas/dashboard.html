@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Beranda saya | Haven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/fonts.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="../assets/css/app.css">
+  <script src="../assets/js/app.js" defer></script>
+</head>
+<body>
+  <script src="../assets/js/layout.js" data-layout="app" data-role="penyintas" data-active="dashboard"></script>
+  <div class="app-shell">
+    <script>HavenLayout.sidebar()</script>
+    <main id="main" class="app-main">
+      <div class="app-page-head">
+        <div>
+          <h1 class="app-title">Halo, Rani.</h1>
+          <p class="app-sub">Kamu punya 2 pesan baru dan 1 sesi minggu ini. Pelan-pelan saja.</p>
+        </div>
+        <a class="btn btn-yellow" href="../lapor.html"><svg class="icon" aria-hidden="true"><use href="#i-file-plus"/></svg> Buat laporan baru</a>
+      </div>
+
+      <dl class="kpis kpis-3" style="margin-bottom:24px">
+        <div class="kpi"><dt>Laporan aktif</dt><dd>1</dd></div>
+        <div class="kpi"><dt>Sesi mendatang</dt><dd>1</dd></div>
+        <div class="kpi"><dt>Pesan belum dibaca</dt><dd>2</dd></div>
+      </dl>
+
+      <div class="grid-2">
+        <div class="stack">
+          <section class="panel" aria-labelledby="p-lap">
+            <div class="panel-head"><h2 class="panel-title" id="p-lap">Laporan terbaru</h2><a class="link-btn" href="laporan.html">Semua laporan</a></div>
+            <div class="panel-body">
+              <div class="row-between">
+                <div class="case-id"><span class="case-code" style="font-size:1.25rem">HV-7Q4K2M</span><span class="badge" data-status="didampingi">Didampingi</span></div>
+                <span class="small muted">Diperbarui hari ini, 08.56</span>
+              </div>
+              <p style="margin-top:14px;color:var(--ink-2)">Dewi A. mengirim pesan dan membuka jadwal sesi untuk minggu depan.</p>
+              <div class="row" style="margin-top:18px">
+                <a class="btn btn-ink btn-sm" href="kasus.html#pesan">Balas pesan</a>
+                <a class="text-link" href="kasus.html">Lihat perkembangan <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="p-learn">
+            <div class="panel-head"><h2 class="panel-title" id="p-learn">Lanjutkan belajar</h2></div>
+            <div class="panel-body stack-sm">
+              <a class="text-link" href="../artikel.html">Langkah yang bisa kamu ambil setelah kejadian <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              <a class="text-link" href="../artikel.html">Hak-hakmu sebagai korban <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+            </div>
+          </section>
+        </div>
+
+        <div class="stack">
+          <section class="panel" aria-labelledby="p-sesi">
+            <div class="panel-head"><h2 class="panel-title" id="p-sesi">Sesi berikutnya</h2></div>
+            <div class="panel-body">
+              <div class="session">
+                <span class="session-date"><b>26</b><small>Nov</small></span>
+                <div><h3>Kamis · 10.00</h3><p>Panggilan suara dengan Dewi A.</p></div>
+              </div>
+              <a class="text-link" href="jadwal.html" style="margin-top:12px">Kelola jadwal <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+            </div>
+          </section>
+          <div class="alert alert-info">
+            <svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>
+            <div><strong>Akunmu aman.</strong>Terakhir masuk hari ini pukul 08.40 dari Chrome di Windows. Bukan kamu? <a href="profil.html">Ganti kata sandi</a>.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

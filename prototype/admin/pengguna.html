@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Pengguna | Admin Haven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/fonts.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="../assets/css/app.css">
+  <script src="../assets/js/app.js" defer></script>
+</head>
+<body>
+  <script src="../assets/js/layout.js" data-layout="app" data-role="admin" data-active="pengguna"></script>
+  <div class="app-shell">
+    <script>HavenLayout.sidebar()</script>
+    <main id="main" class="app-main">
+      <div class="app-page-head">
+        <div><h1 class="app-title">Pengguna</h1><p class="app-sub">Akun pendamping dan admin dibuat di sini. Penyintas mendaftar sendiri dan datanya tidak bisa dilihat dari halaman ini.</p></div>
+      </div>
+
+      <div class="grid-2">
+        <div data-filter-list>
+          <div class="filter-bar">
+            <div class="search"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><label class="sr-only" for="q">Cari pengguna</label><input class="input" id="q" type="search" placeholder="Cari nama atau email" data-search></div>
+            <div class="field"><label class="label" for="fr">Peran</label><select class="select select-sm" id="fr" data-filter-select="role"><option value="">Semua peran</option><option value="pendamping">Pendamping</option><option value="admin">Admin</option><option value="penyintas">Penyintas</option></select></div>
+          </div>
+          <div class="table-wrap table-cards">
+            <table class="table">
+              <thead><tr><th scope="col">Nama</th><th scope="col">Peran</th><th scope="col">Status</th><th scope="col">Terakhir masuk</th><th scope="col"><span class="sr-only">Aksi</span></th></tr></thead>
+              <tbody>
+                <tr data-item data-role="pendamping"><td data-label="Nama"><strong>Dewi Anggraini</strong><span class="cell-sub">dewi@demo.id</span></td><td data-label="Peran">Pendamping</td><td data-label="Status"><span class="badge badge-ok">Aktif</span></td><td data-label="Terakhir masuk" class="mono">HARI INI 08.12</td><td class="actions" data-label="Aksi"><div class="row"><button class="btn btn-ghost btn-xs" type="button" data-toast="Tautan reset kata sandi dikirim ke dewi@demo.id.">Reset sandi</button><button class="btn btn-ghost btn-xs" type="button" data-confirm="dlg-off" data-done="Akun Dewi Anggraini dinonaktifkan.">Nonaktifkan</button></div></td></tr>
+                <tr data-item data-role="pendamping"><td data-label="Nama"><strong>Sari Pratiwi</strong><span class="cell-sub">sari@demo.id</span></td><td data-label="Peran">Pendamping</td><td data-label="Status"><span class="badge badge-ok">Aktif</span></td><td data-label="Terakhir masuk" class="mono">KEMARIN</td><td class="actions" data-label="Aksi"><div class="row"><button class="btn btn-ghost btn-xs" type="button" data-toast="Tautan reset kata sandi dikirim.">Reset sandi</button><button class="btn btn-ghost btn-xs" type="button" data-confirm="dlg-off" data-done="Akun dinonaktifkan.">Nonaktifkan</button></div></td></tr>
+                <tr data-item data-role="pendamping"><td data-label="Nama"><strong>Bayu Nugroho</strong><span class="cell-sub">bayu@demo.id</span></td><td data-label="Peran">Pendamping</td><td data-label="Status"><span class="badge badge-ok">Aktif</span></td><td data-label="Terakhir masuk" class="mono">18 NOV</td><td class="actions" data-label="Aksi"><div class="row"><button class="btn btn-ghost btn-xs" type="button" data-toast="Tautan reset kata sandi dikirim.">Reset sandi</button><button class="btn btn-ghost btn-xs" type="button" data-confirm="dlg-off" data-done="Akun dinonaktifkan.">Nonaktifkan</button></div></td></tr>
+                <tr data-item data-role="pendamping"><td data-label="Nama"><strong>Rudi Hartono</strong><span class="cell-sub">rudi@demo.id</span></td><td data-label="Peran">Pendamping</td><td data-label="Status"><span class="badge" data-status="ditutup">Nonaktif</span></td><td data-label="Terakhir masuk" class="mono">03 SEP</td><td class="actions" data-label="Aksi"><button class="btn btn-ghost btn-xs" type="button" data-toast="Akun Rudi Hartono diaktifkan kembali.">Aktifkan</button></td></tr>
+                <tr data-item data-role="admin"><td data-label="Nama"><strong>Admin Haven</strong><span class="cell-sub">admin@demo.id</span></td><td data-label="Peran">Admin</td><td data-label="Status"><span class="badge badge-ok">Aktif</span></td><td data-label="Terakhir masuk" class="mono">HARI INI 07.55</td><td class="actions" data-label="Aksi"><span class="small muted">Akun kamu</span></td></tr>
+                <tr data-item data-role="penyintas"><td data-label="Nama"><strong>Penyintas terdaftar</strong><span class="cell-sub">Identitas disembunyikan</span></td><td data-label="Peran">Penyintas</td><td data-label="Status"><span class="badge badge-plain">128 akun</span></td><td data-label="Terakhir masuk" class="mono">-</td><td class="actions" data-label="Aksi"><span class="small muted">Tidak dapat dikelola</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <form class="panel" novalidate data-demo data-success="Akun dibuat. Undangan untuk membuat kata sandi dikirim lewat email." data-reset>
+          <div class="panel-head"><h2 class="panel-title">Tambah pendamping atau admin</h2></div>
+          <div class="panel-body form-stack">
+            <div class="field"><label class="label" for="nm">Nama lengkap</label><input class="input" id="nm" required data-msg="Tulis nama lengkap."></div>
+            <div class="field"><label class="label" for="em">Email</label><input class="input" type="email" id="em" required data-msg="Masukkan email untuk undangan."></div>
+            <div class="field"><label class="label" for="rl">Peran</label><select class="select" id="rl"><option>Pendamping</option><option>Admin</option></select></div>
+            <div class="field"><label class="label" for="wl">Wilayah kerja</label><input class="input" id="wl" placeholder="Contoh: Banyumas"></div>
+          </div>
+          <div class="panel-foot row" style="justify-content:flex-end"><button class="btn btn-ink btn-sm" type="submit">Kirim undangan</button></div>
+        </form>
+      </div>
+
+      <dialog class="modal" id="dlg-off" aria-labelledby="dlg-off-t">
+        <form method="dialog">
+          <div class="modal-body"><h2 id="dlg-off-t">Nonaktifkan akun ini?</h2><p>Pengguna tidak bisa masuk lagi. Kasus aktifnya perlu ditugaskan ulang ke pendamping lain.</p></div>
+          <div class="modal-actions"><button class="btn btn-ghost btn-sm" value="cancel">Batal</button><button class="btn btn-danger btn-sm" value="ok">Nonaktifkan</button></div>
+        </form>
+      </dialog>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Masuk | Haven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/fonts.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+  <script src="assets/js/app.js" defer></script>
+</head>
+<body>
+  <script src="assets/js/layout.js" data-layout="public" data-active=""></script>
+
+  <main id="main" class="auth">
+    <div class="auth-media">
+      <div class="media"><img src="assets/img/holding-hands.jpg" alt="" width="1000" height="1500"></div>
+      <p class="auth-quote">Tidak ada cerita yang terlalu kecil untuk didengar.</p>
+    </div>
+    <div class="auth-panel">
+      <div class="auth-form">
+        <h1 class="h2">Masuk ke Haven</h1>
+        <p>Lihat laporan, pesan, dan jadwal sesimu di satu tempat.</p>
+        <form class="form-stack" novalidate data-demo data-redirect="penyintas/dashboard.html">
+          <div class="field">
+            <label class="label" for="email">Email</label>
+            <input class="input" type="email" id="email" name="email" autocomplete="email" required data-msg="Masukkan email akunmu.">
+          </div>
+          <div class="field">
+            <div class="row-between"><label class="label" for="password">Kata sandi</label><a class="link-btn" href="lupa-password.html">Lupa kata sandi?</a></div>
+            <div class="input-group">
+              <input class="input" type="password" id="password" name="password" autocomplete="current-password" required data-msg="Masukkan kata sandimu.">
+              <button class="reveal" type="button" data-reveal="password" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg><span class="sr-only">Tampilkan</span></button>
+            </div>
+          </div>
+          <button class="btn btn-ink btn-lg btn-block" type="submit">Masuk</button>
+        </form>
+        <div class="panel panel-cream panel-body demo-accounts">
+          <p class="small"><strong>Akun demo prototipe</strong>, semua dengan kata sandi <span class="mono">haven123</span>:</p>
+          <table>
+            <tr><td><a href="penyintas/dashboard.html">Penyintas</a></td><td>rani@demo.id</td></tr>
+            <tr><td><a href="pendamping/dashboard.html">Pendamping</a></td><td>dewi@demo.id</td></tr>
+            <tr><td><a href="admin/dashboard.html">Admin</a></td><td>admin@demo.id</td></tr>
+          </table>
+        </div>
+        <p class="auth-alt">Belum punya akun? <a href="daftar.html">Daftar</a>. Atau <a href="lapor.html">lapor tanpa akun</a>.</p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

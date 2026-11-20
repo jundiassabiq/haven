@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Edukasi | Haven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/fonts.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+  <script src="assets/js/app.js" defer></script>
+</head>
+<body>
+  <script src="assets/js/layout.js" data-layout="public" data-active="edukasi"></script>
+
+  <main id="main">
+    <section class="page-head">
+      <div class="container">
+        <h1 class="h2">Pahami dulu, lalu putuskan langkahmu.</h1>
+        <p class="lede">Bacaan singkat tentang bentuk kekerasan seksual, hak korban, dan cara saling menjaga. Ditulis berdasarkan UU No. 12 Tahun 2022 tentang Tindak Pidana Kekerasan Seksual.</p>
+      </div>
+    </section>
+
+    <section class="section-sm" data-filter-list>
+      <div class="container">
+        <div class="filter-bar" style="align-items:center">
+          <div class="chips" role="group" aria-label="Kategori">
+            <button class="chip" type="button" data-filter="semua" aria-pressed="true">Semua</button>
+            <button class="chip" type="button" data-filter="mengenali" aria-pressed="false">Mengenali</button>
+            <button class="chip" type="button" data-filter="setelah" aria-pressed="false">Setelah kejadian</button>
+            <button class="chip" type="button" data-filter="hak" aria-pressed="false">Hak korban</button>
+            <button class="chip" type="button" data-filter="mendampingi" aria-pressed="false">Mendampingi</button>
+            <button class="chip" type="button" data-filter="digital" aria-pressed="false">Keamanan digital</button>
+          </div>
+          <div class="search">
+            <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+            <label class="sr-only" for="cari">Cari artikel</label>
+            <input class="input" id="cari" type="search" placeholder="Cari artikel, misalnya consent" data-search>
+          </div>
+        </div>
+        <p class="result-count" data-result-count data-noun="artikel" aria-live="polite" style="margin-bottom:32px"></p>
+
+        <ul class="article-grid">
+          <li class="article-card" data-item data-category="mengenali">
+            <div class="media"><img src="assets/img/reaching-hands.jpg" alt="" width="1600" height="1067" loading="lazy"></div>
+            <h3><a href="artikel.html">Sembilan bentuk kekerasan seksual menurut UU TPKS</a></h3>
+            <p>Perilaku apa saja yang diakui hukum sebagai kekerasan seksual.</p>
+            <p class="article-meta"><span class="cat">Mengenali</span><span>6 menit baca</span></p>
+          </li>
+          <li class="article-card" data-item data-category="setelah">
+            <div class="media"><img src="assets/img/sunset.jpg" alt="" width="1200" height="1600" loading="lazy"></div>
+            <h3><a href="artikel.html">Langkah yang bisa kamu ambil setelah kejadian</a></h3>
+            <p>Tidak ada urutan yang wajib. Ini pilihan-pilihan yang bisa membantu, termasuk menjaga bukti.</p>
+            <p class="article-meta"><span class="cat">Setelah kejadian</span><span>5 menit baca</span></p>
+          </li>
+          <li class="article-card" data-item data-category="hak">
+            <div class="media"><img src="assets/img/counseling.jpg" alt="" width="1600" height="1067" loading="lazy"></div>
+            <h3><a href="artikel.html">Hak-hakmu sebagai korban</a></h3>
+            <p>Penanganan, pelindungan, dan pemulihan adalah hakmu menurut UU TPKS.</p>
+            <p class="article-meta"><span class="cat">Hak korban</span><span>5 menit baca</span></p>
+          </li>
+          <li class="article-card" data-item data-category="mendampingi">
+            <div class="media"><img src="assets/img/holding-hands.jpg" alt="" width="1000" height="1500" loading="lazy"></div>
+            <h3><a href="artikel.html">Cara mendampingi teman yang bercerita</a></h3>
+            <p>Apa yang sebaiknya diucapkan, dan apa yang sebaiknya tidak.</p>
+            <p class="article-meta"><span class="cat">Mendampingi</span><span>4 menit baca</span></p>
+          </li>
+          <li class="article-card" data-item data-category="mengenali">
+            <div class="media"><img src="assets/img/support-circle.jpg" alt="" width="2400" height="1600" loading="lazy"></div>
+            <h3><a href="artikel.html">Memahami consent: setuju yang sesungguhnya</a></h3>
+            <p>Diam bukan berarti iya. Persetujuan harus sadar, sukarela, dan boleh ditarik kapan pun.</p>
+            <p class="article-meta"><span class="cat">Mengenali</span><span>4 menit baca</span></p>
+          </li>
+          <li class="article-card" data-item data-category="digital">
+            <div class="media"><img src="assets/img/phone.jpg" alt="" width="1600" height="1067" loading="lazy"></div>
+            <h3><a href="artikel.html">Kekerasan seksual berbasis elektronik dan cara melindungi diri</a></h3>
+            <p>Ancaman menyebar foto, pesan cabul, dan penguntitan daring. Begini cara mengamankan bukti dan akun.</p>
+            <p class="article-meta"><span class="cat">Keamanan digital</span><span>7 menit baca</span></p>
+          </li>
+          <li class="article-card" data-item data-category="mengenali">
+            <div class="media"><img src="assets/img/laptop.jpg" alt="" width="1600" height="1067" loading="lazy"></div>
+            <h3><a href="artikel.html">Mengenali grooming sejak dini</a></h3>
+            <p>Tanda yang sering terlewat: perhatian berlebih, hadiah, dan permintaan untuk merahasiakan.</p>
+            <p class="article-meta"><span class="cat">Mengenali</span><span>5 menit baca</span></p>
+          </li>
+        </ul>
+
+        <div class="empty" data-empty hidden>
+          <svg class="icon" aria-hidden="true"><use href="#i-search"/></svg>
+          <h3>Belum ada artikel yang cocok</h3>
+          <p>Coba kata kunci lain, atau lihat semua kategori.</p>
+          <button class="btn btn-ink btn-sm" type="button" data-reset-filter>Tampilkan semua artikel</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>HavenLayout.footer()</script>
+</body>
+</html>

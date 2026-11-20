@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Ringkasan pendamping | Haven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/fonts.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="../assets/css/app.css">
+  <script src="../assets/js/app.js" defer></script>
+</head>
+<body>
+  <script src="../assets/js/layout.js" data-layout="app" data-role="pendamping" data-active="dashboard"></script>
+  <div class="app-shell">
+    <script>HavenLayout.sidebar()</script>
+    <main id="main" class="app-main">
+      <div class="app-page-head">
+        <div><h1 class="app-title">Selamat pagi, Dewi.</h1><p class="app-sub">Jumat, 20 November 2026. Ada 1 kasus baru yang belum kamu sapa.</p></div>
+        <a class="btn btn-ink btn-sm" href="slot.html"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg> Buka slot jadwal</a>
+      </div>
+
+      <dl class="kpis" style="margin-bottom:24px">
+        <div class="kpi"><dt>Kasus aktif</dt><dd>4</dd></div>
+        <div class="kpi"><dt>Belum disapa</dt><dd>1</dd></div>
+        <div class="kpi"><dt>Sesi hari ini</dt><dd>2</dd></div>
+        <div class="kpi"><dt>Pesan belum dibaca</dt><dd>3</dd></div>
+      </dl>
+
+      <div class="grid-2">
+        <section class="panel" aria-labelledby="need">
+          <div class="panel-head"><h2 class="panel-title" id="need">Perlu perhatian</h2><a class="link-btn" href="kasus.html">Semua kasus</a></div>
+          <div class="table-wrap table-cards" style="border:0;border-radius:0 0 6px 6px">
+            <table class="table">
+              <thead><tr><th scope="col">Kode</th><th scope="col">Status</th><th scope="col">Urgensi</th><th scope="col">Alasan</th></tr></thead>
+              <tbody>
+                <tr><td data-label="Kode" class="mono"><a class="row-link" href="kasus-detail.html">HV-3T8N5R</a></td><td data-label="Status"><span class="badge" data-status="ditinjau">Ditinjau</span></td><td data-label="Urgensi"><span class="badge" data-urgency="tinggi">Tinggi</span></td><td data-label="Alasan">Baru ditugaskan, belum ada pesan</td></tr>
+                <tr><td data-label="Kode" class="mono"><a class="row-link" href="kasus-detail.html">HV-7Q4K2M</a></td><td data-label="Status"><span class="badge" data-status="didampingi">Didampingi</span></td><td data-label="Urgensi"><span class="badge" data-urgency="sedang">Sedang</span></td><td data-label="Alasan">2 pesan belum dibalas</td></tr>
+                <tr><td data-label="Kode" class="mono"><a class="row-link" href="kasus-detail.html">HV-5M7C1D</a></td><td data-label="Status"><span class="badge" data-status="dirujuk">Dirujuk</span></td><td data-label="Urgensi"><span class="badge" data-urgency="rendah">Rendah</span></td><td data-label="Alasan">Tindak lanjut rujukan LBH</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="today">
+          <div class="panel-head"><h2 class="panel-title" id="today">Sesi hari ini</h2></div>
+          <div class="panel-body">
+            <div class="session"><span class="session-date"><b>10.00</b><small>WIB</small></span><div><h3>HV-7Q4K2M</h3><p>Panggilan suara · 45 menit</p></div></div>
+            <div class="session"><span class="session-date"><b>15.30</b><small>WIB</small></span><div><h3>HV-5M7C1D</h3><p>Video · tindak lanjut rujukan</p></div></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

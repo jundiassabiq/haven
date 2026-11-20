@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Daftar | Haven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/fonts.css">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+  <script src="assets/js/app.js" defer></script>
+</head>
+<body>
+  <script src="assets/js/layout.js" data-layout="public" data-active=""></script>
+
+  <main id="main" class="auth">
+    <div class="auth-media">
+      <div class="media"><img src="assets/img/sunset.jpg" alt="" width="1200" height="1600"></div>
+      <p class="auth-quote">Kamu yang memegang kendali atas ceritamu.</p>
+    </div>
+    <div class="auth-panel">
+      <div class="auth-form">
+        <h1 class="h2">Buat akun</h1>
+        <p>Akun membantu menyimpan laporan dan pesan tanpa perlu kode dan PIN.</p>
+        <form class="form-stack" novalidate data-demo data-redirect="penyintas/dashboard.html">
+          <div class="field">
+            <label class="label" for="nama">Nama panggilan</label>
+            <input class="input" id="nama" name="nama" autocomplete="nickname" required maxlength="40" data-msg="Tulis nama panggilan. Boleh nama samaran.">
+            <p class="hint">Boleh nama samaran. Pendamping akan memanggilmu dengan nama ini.</p>
+          </div>
+          <div class="field">
+            <label class="label" for="email">Email</label>
+            <input class="input" type="email" id="email" name="email" autocomplete="email" required data-msg="Masukkan email untuk masuk dan pemulihan akun.">
+          </div>
+          <div class="field">
+            <label class="label" for="pw">Kata sandi</label>
+            <div class="input-group">
+              <input class="input" type="password" id="pw" name="password" autocomplete="new-password" minlength="8" required aria-describedby="pw-hint" data-msg="Buat kata sandi minimal 8 karakter.">
+              <button class="reveal" type="button" data-reveal="pw" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg><span class="sr-only">Tampilkan</span></button>
+            </div>
+            <p class="hint" id="pw-hint">Minimal 8 karakter. Gabungan kata yang mudah kamu ingat lebih aman daripada kata pendek yang rumit.</p>
+          </div>
+          <div class="field">
+            <label class="label" for="pw2">Ulangi kata sandi</label>
+            <input class="input" type="password" id="pw2" name="password_confirm" autocomplete="new-password" required data-match="pw" data-msg="Ketik ulang kata sandimu.">
+          </div>
+          <label class="check field"><input type="checkbox" name="setuju" required data-msg="Centang untuk melanjutkan."> <span>Saya setuju dengan cara Haven menyimpan dan melindungi data saya.</span></label>
+          <button class="btn btn-ink btn-lg btn-block" type="submit">Buat akun</button>
+        </form>
+        <p class="auth-alt">Sudah punya akun? <a href="masuk.html">Masuk</a>.</p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

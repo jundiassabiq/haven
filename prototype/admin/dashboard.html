@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Statistik | Admin Haven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/fonts.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="../assets/css/app.css">
+  <script src="../assets/js/app.js" defer></script>
+</head>
+<body>
+  <script src="../assets/js/layout.js" data-layout="app" data-role="admin" data-active="dashboard"></script>
+  <div class="app-shell">
+    <script>HavenLayout.sidebar()</script>
+    <main id="main" class="app-main">
+      <div class="app-page-head">
+        <div><h1 class="app-title">Statistik</h1><p class="app-sub">Data agregat tanpa isi laporan. Kategori dengan kurang dari 5 kasus digabung ke "Lainnya" agar penyintas tidak bisa dikenali.</p></div>
+        <div class="field" style="min-width:200px"><label class="label" for="range">Rentang</label><select class="select select-sm" id="range"><option>12 bulan terakhir</option><option>30 hari terakhir</option><option>Tahun 2026</option></select></div>
+      </div>
+
+      <dl class="kpis" style="margin-bottom:24px">
+        <div class="kpi"><dt>Laporan masuk</dt><dd>214</dd><span class="kpi-note">+18 bulan ini</span></div>
+        <div class="kpi"><dt>Menunggu ditinjau</dt><dd>3</dd><span class="kpi-note">Tertua 5 jam</span></div>
+        <div class="kpi"><dt>Sedang didampingi</dt><dd>47</dd><span class="kpi-note">oleh 9 pendamping</span></div>
+        <div class="kpi"><dt>Rata-rata sampai disapa</dt><dd>6,2 j</dd><span class="kpi-note">Target di bawah 24 jam</span></div>
+      </dl>
+
+      <div class="grid-2" style="margin-bottom:24px">
+        <section class="panel">
+          <div class="panel-head"><h2 class="panel-title">Laporan per bulan</h2></div>
+          <div class="panel-body">
+            <div class="chart"><canvas role="img" aria-label="Grafik garis laporan per bulan, Desember 2025 sampai November 2026, naik dari 9 menjadi 24 laporan" data-chart='{"type":"line","labels":["Des","Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov"],"series":[{"name":"Laporan","values":[9,12,11,15,14,17,16,19,21,18,22,24]}]}'></canvas></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h2 class="panel-title">Jenis kejadian</h2></div>
+          <div class="panel-body">
+            <div class="chart"><canvas role="img" aria-label="Jenis kejadian: pelecehan nonfisik 78, berbasis elektronik 54, pelecehan fisik 46, pemaksaan 21, lainnya 15" data-chart='{"type":"hbar","labels":["Pelecehan nonfisik","Berbasis elektronik","Pelecehan fisik","Pemaksaan","Lainnya (n<5 digabung)"],"series":[{"name":"Kasus","values":[78,54,46,21,15]}]}'></canvas></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="grid-2">
+        <section class="panel">
+          <div class="panel-head"><h2 class="panel-title">Status kasus per bulan</h2></div>
+          <div class="panel-body">
+            <div class="chart"><canvas role="img" aria-label="Grafik batang kasus baru dan kasus selesai per bulan, Juni sampai November 2026" data-chart='{"type":"bar","labels":["Jun","Jul","Agu","Sep","Okt","Nov"],"series":[{"name":"Baru","values":[16,19,21,18,22,24]},{"name":"Selesai","values":[12,15,17,19,18,14]}]}'></canvas></div>
+            <div class="chart-legend"><span><i style="background:#1C1B19"></i>Kasus baru</span><span><i style="background:#FFC907"></i>Kasus selesai</span></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h2 class="panel-title">Beban pendamping</h2><a class="link-btn" href="pengguna.html">Kelola</a></div>
+          <div class="table-wrap" style="border:0;border-radius:0 0 6px 6px">
+            <table class="table">
+              <thead><tr><th scope="col">Pendamping</th><th scope="col" class="num">Aktif</th><th scope="col" class="num">Bulan ini</th></tr></thead>
+              <tbody>
+                <tr><td>Dewi Anggraini</td><td class="num">4</td><td class="num">3</td></tr>
+                <tr><td>Sari Pratiwi</td><td class="num">7</td><td class="num">4</td></tr>
+                <tr><td>Bayu Nugroho</td><td class="num">5</td><td class="num">2</td></tr>
+                <tr><td>Laras Wulandari</td><td class="num">6</td><td class="num">5</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

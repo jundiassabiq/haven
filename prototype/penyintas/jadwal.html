@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Jadwal sesi | Haven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/fonts.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="../assets/css/app.css">
+  <script src="../assets/js/app.js" defer></script>
+</head>
+<body>
+  <script src="../assets/js/layout.js" data-layout="app" data-role="penyintas" data-active="jadwal"></script>
+  <div class="app-shell">
+    <script>HavenLayout.sidebar()</script>
+    <main id="main" class="app-main">
+      <div class="app-page-head">
+        <div>
+          <h1 class="app-title">Jadwal sesi</h1>
+          <p class="app-sub">Sesi bicara dengan pendampingmu. Untuk memesan waktu baru, buka tab Jadwal sesi di laporanmu.</p>
+        </div>
+        <a class="btn btn-ink btn-sm" href="kasus.html#jadwal">Pesan sesi baru</a>
+      </div>
+
+      <div class="grid-halves">
+        <section class="panel" aria-labelledby="up">
+          <div class="panel-head"><h2 class="panel-title" id="up">Akan datang</h2></div>
+          <div class="panel-body">
+            <div class="session">
+              <span class="session-date"><b>26</b><small>Nov</small></span>
+              <div><h3>Kamis · 10.00–10.45</h3><p>Panggilan suara dengan Dewi A. · <span class="mono">HV-7Q4K2M</span></p></div>
+              <button class="btn btn-ghost btn-xs" type="button" data-confirm="dlg-cancel" data-done="Sesi Kamis, 26 Nov dibatalkan." data-remove-closest=".session">Batalkan</button>
+            </div>
+          </div>
+        </section>
+        <section class="panel" aria-labelledby="past">
+          <div class="panel-head"><h2 class="panel-title" id="past">Sudah lewat</h2></div>
+          <div class="panel-body">
+            <div class="session"><span class="session-date is-past"><b>18</b><small>Nov</small></span><div><h3>Rabu · 19.00–19.45</h3><p>Selesai · Panggilan suara</p></div></div>
+            <div class="session"><span class="session-date is-past"><b>14</b><small>Nov</small></span><div><h3>Sabtu · 13.00–13.45</h3><p>Dibatalkan olehmu</p></div></div>
+          </div>
+        </section>
+      </div>
+
+      <dialog class="modal" id="dlg-cancel" aria-labelledby="dlg-cancel-t">
+        <form method="dialog">
+          <div class="modal-body"><h2 id="dlg-cancel-t">Batalkan sesi Kamis, 26 Nov?</h2><p>Pendamping akan diberi tahu dan slotnya dibuka lagi.</p></div>
+          <div class="modal-actions"><button class="btn btn-ghost btn-sm" value="cancel">Tetap ikut sesi</button><button class="btn btn-danger btn-sm" value="ok">Batalkan sesi</button></div>
+        </form>
+      </dialog>
+    </main>
+  </div>
+</body>
+</html>

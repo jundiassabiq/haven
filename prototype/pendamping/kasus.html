@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Kasus saya | Haven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/fonts.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="../assets/css/app.css">
+  <script src="../assets/js/app.js" defer></script>
+</head>
+<body>
+  <script src="../assets/js/layout.js" data-layout="app" data-role="pendamping" data-active="kasus"></script>
+  <div class="app-shell">
+    <script>HavenLayout.sidebar()</script>
+    <main id="main" class="app-main" data-filter-list>
+      <div class="app-page-head">
+        <div><h1 class="app-title">Kasus saya</h1><p class="app-sub">Hanya kasus yang ditugaskan kepadamu. Setiap kali detail kasus dibuka, aksesnya tercatat.</p></div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><label class="sr-only" for="q">Cari kode</label><input class="input" id="q" type="search" placeholder="Cari kode laporan" data-search></div>
+        <div class="field"><label class="label" for="fs">Status</label><select class="select select-sm" id="fs" data-filter-select="status"><option value="">Semua status</option><option value="ditinjau">Ditinjau</option><option value="didampingi">Didampingi</option><option value="dirujuk">Dirujuk</option><option value="selesai">Selesai</option></select></div>
+        <div class="field"><label class="label" for="fu">Urgensi</label><select class="select select-sm" id="fu" data-filter-select="urgency"><option value="">Semua urgensi</option><option value="tinggi">Tinggi</option><option value="sedang">Sedang</option><option value="rendah">Rendah</option></select></div>
+      </div>
+      <p class="result-count" data-result-count data-noun="kasus" style="margin-bottom:12px"></p>
+
+      <div class="table-wrap table-cards">
+        <table class="table">
+          <thead><tr><th scope="col">Kode</th><th scope="col">Jenis</th><th scope="col">Status</th><th scope="col">Urgensi</th><th scope="col">Wilayah</th><th scope="col">Aktivitas terakhir</th><th scope="col"><span class="sr-only">Aksi</span></th></tr></thead>
+          <tbody>
+            <tr data-item data-status="ditinjau" data-urgency="tinggi" class="is-unread-row"><td data-label="Kode" class="mono"><a class="row-link" href="kasus-detail.html">HV-3T8N5R</a></td><td data-label="Jenis">Pelecehan fisik</td><td data-label="Status"><span class="badge" data-status="ditinjau">Ditinjau</span></td><td data-label="Urgensi"><span class="badge" data-urgency="tinggi">Tinggi</span></td><td data-label="Wilayah">Banyumas</td><td data-label="Aktivitas" class="mono">25 MENIT LALU</td><td class="actions" data-label="Aksi"><a class="btn btn-ink btn-xs" href="kasus-detail.html">Buka</a></td></tr>
+            <tr data-item data-status="didampingi" data-urgency="sedang" class="is-unread-row"><td data-label="Kode" class="mono"><a class="row-link" href="kasus-detail.html">HV-7Q4K2M</a></td><td data-label="Jenis">Pelecehan nonfisik</td><td data-label="Status"><span class="badge" data-status="didampingi">Didampingi</span></td><td data-label="Urgensi"><span class="badge" data-urgency="sedang">Sedang</span></td><td data-label="Wilayah">Banyumas</td><td data-label="Aktivitas" class="mono">40 MENIT LALU</td><td class="actions" data-label="Aksi"><a class="btn btn-ink btn-xs" href="kasus-detail.html">Buka</a></td></tr>
+            <tr data-item data-status="dirujuk" data-urgency="rendah"><td data-label="Kode" class="mono"><a class="row-link" href="kasus-detail.html">HV-5M7C1D</a></td><td data-label="Jenis">Kekerasan berbasis elektronik</td><td data-label="Status"><span class="badge" data-status="dirujuk">Dirujuk</span></td><td data-label="Urgensi"><span class="badge" data-urgency="rendah">Rendah</span></td><td data-label="Wilayah">Purbalingga</td><td data-label="Aktivitas" class="mono">KEMARIN</td><td class="actions" data-label="Aksi"><a class="btn btn-ghost btn-xs" href="kasus-detail.html">Buka</a></td></tr>
+            <tr data-item data-status="didampingi" data-urgency="sedang"><td data-label="Kode" class="mono"><a class="row-link" href="kasus-detail.html">HV-4D6G9Z</a></td><td data-label="Jenis">Pemaksaan</td><td data-label="Status"><span class="badge" data-status="didampingi">Didampingi</span></td><td data-label="Urgensi"><span class="badge" data-urgency="sedang">Sedang</span></td><td data-label="Wilayah">Cilacap</td><td data-label="Aktivitas" class="mono">17 NOV</td><td class="actions" data-label="Aksi"><a class="btn btn-ghost btn-xs" href="kasus-detail.html">Buka</a></td></tr>
+            <tr data-item data-status="selesai" data-urgency="rendah"><td data-label="Kode" class="mono"><a class="row-link" href="kasus-detail.html">HV-1A5E3Q</a></td><td data-label="Jenis">Pelecehan nonfisik</td><td data-label="Status"><span class="badge" data-status="selesai">Selesai</span></td><td data-label="Urgensi"><span class="badge" data-urgency="rendah">Rendah</span></td><td data-label="Wilayah">Banyumas</td><td data-label="Aktivitas" class="mono">30 OKT</td><td class="actions" data-label="Aksi"><a class="btn btn-ghost btn-xs" href="kasus-detail.html">Lihat</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="empty" data-empty hidden style="margin-top:12px">
+        <svg class="icon" aria-hidden="true"><use href="#i-inbox"/></svg>
+        <h3>Tidak ada kasus yang cocok</h3>
+        <p>Ubah filter untuk melihat kasus lain.</p>
+        <button class="btn btn-ink btn-sm" type="button" data-reset-filter>Hapus filter</button>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

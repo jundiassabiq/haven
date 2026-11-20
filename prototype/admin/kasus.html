@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Tinjau HV-9B2X6P | Admin Haven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/fonts.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="../assets/css/app.css">
+  <script src="../assets/js/app.js" defer></script>
+</head>
+<body>
+  <script src="../assets/js/layout.js" data-layout="app" data-role="admin" data-active="antrean"></script>
+  <div class="app-shell">
+    <script>HavenLayout.sidebar()</script>
+    <main id="main" class="app-main">
+      <a class="back-link" href="antrean.html"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg> Antrean kasus</a>
+      <div class="case-head">
+        <div class="case-id">
+          <h1 class="case-code">HV-9B2X6P</h1>
+          <span class="badge" data-status="diterima">Diterima</span>
+          <span class="badge" data-urgency="tinggi">Penyintas menyatakan dalam bahaya</span>
+          <div class="case-meta">
+            <span><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>Anonim</span>
+            <span><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Masuk 20 Nov 2026 · 09.02</span>
+            <span><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg>Akses ini tercatat</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="stack">
+          <section class="panel">
+            <div class="panel-head"><h2 class="panel-title">Data untuk pemilahan</h2></div>
+            <div class="panel-body stack">
+              <dl class="kv">
+                <div><dt>Jenis</dt><dd>Pelecehan fisik</dd></div>
+                <div><dt>Masih berlangsung</dt><dd>Ya</dd></div>
+                <div><dt>Wilayah</dt><dd>Banyumas, Jawa Tengah</dd></div>
+                <div><dt>Jenis tempat</dt><dd>Tempat kerja</dd></div>
+                <div><dt>Kontak pilihan</dt><dd>Pesan Haven, WhatsApp</dd></div>
+                <div><dt>Bukti</dt><dd>1 file</dd></div>
+              </dl>
+              <div class="alert alert-info">
+                <svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>
+                <div><strong>Kronologi dan kontak tidak ditampilkan untuk admin.</strong>Isinya terbuka otomatis untuk pendamping setelah kamu menugaskan kasus ini.</div>
+              </div>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><h2 class="panel-title">Riwayat akses</h2><a class="link-btn" href="audit.html">Audit log</a></div>
+            <div class="table-wrap" style="border:0;border-radius:0 0 6px 6px">
+              <table class="table">
+                <thead><tr><th scope="col">Waktu</th><th scope="col">Pengguna</th><th scope="col">Aksi</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">20 NOV 09.14</td><td>Admin Haven</td><td>Membuka data pemilahan</td></tr>
+                  <tr><td class="mono">20 NOV 09.02</td><td>Sistem</td><td>Laporan dibuat, data dienkripsi</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <aside class="stack">
+          <form class="panel" novalidate data-demo data-success="HV-9B2X6P ditugaskan ke Dewi Anggraini. Notifikasi dikirim.">
+            <div class="panel-head"><h2 class="panel-title">Tinjau &amp; tugaskan</h2></div>
+            <div class="panel-body form-stack">
+              <fieldset class="field">
+                <legend class="label">Urgensi</legend>
+                <div class="chips">
+                  <label class="choice"><input type="radio" name="urg" value="tinggi" checked><span class="choice-body" style="padding-block:10px"><span class="choice-title">Tinggi</span></span></label>
+                  <label class="choice"><input type="radio" name="urg" value="sedang"><span class="choice-body" style="padding-block:10px"><span class="choice-title">Sedang</span></span></label>
+                  <label class="choice"><input type="radio" name="urg" value="rendah"><span class="choice-body" style="padding-block:10px"><span class="choice-title">Rendah</span></span></label>
+                </div>
+              </fieldset>
+              <div class="field">
+                <label class="label" for="pd">Pendamping</label>
+                <select class="select" id="pd" required data-msg="Pilih pendamping yang akan menangani.">
+                  <option value="">Pilih pendamping</option>
+                  <option>Dewi Anggraini · 4 kasus aktif · Banyumas</option>
+                  <option>Bayu Nugroho · 5 kasus aktif · Banyumas</option>
+                  <option>Laras Wulandari · 6 kasus aktif · Semarang</option>
+                  <option>Sari Pratiwi · 7 kasus aktif · Purbalingga</option>
+                </select>
+                <p class="hint">Diurutkan dari beban kerja paling ringan di wilayah yang sama.</p>
+              </div>
+              <div class="field">
+                <label class="label" for="nt">Catatan untuk pendamping <span class="opt">(opsional)</span></label>
+                <textarea class="textarea textarea-sm" id="nt" maxlength="500" placeholder="Contoh: Penyintas menyatakan dalam bahaya. Sapa dalam 1 jam."></textarea>
+              </div>
+            </div>
+            <div class="panel-foot row-between">
+              <button class="btn btn-ghost btn-sm" type="button" data-confirm="dlg-close" data-done="Laporan ditutup. Alasan tersimpan di riwayat status.">Tutup laporan</button>
+              <button class="btn btn-yellow btn-sm" type="submit">Tugaskan</button>
+            </div>
+          </form>
+          <div class="alert alert-danger">
+            <svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>
+            <div><strong>Prioritaskan.</strong>Penyintas memilih "Ya, saya butuh bantuan segera". Laporan ini ditampilkan paling atas di antrean.</div>
+          </div>
+        </aside>
+      </div>
+
+      <dialog class="modal" id="dlg-close" aria-labelledby="dlg-close-t">
+        <form method="dialog" novalidate>
+          <div class="modal-body">
+            <h2 id="dlg-close-t">Tutup laporan tanpa pendampingan?</h2>
+            <p>Gunakan hanya bila laporan tidak bisa ditindaklanjuti, misalnya duplikat atau spam. Penyintas akan melihat alasannya.</p>
+            <div class="field"><label class="label" for="rs">Alasan</label><textarea class="textarea textarea-sm" id="rs" required minlength="10" data-msg="Tulis alasan penutupan."></textarea></div>
+          </div>
+          <div class="modal-actions"><button class="btn btn-ghost btn-sm" value="cancel" formnovalidate>Batal</button><button class="btn btn-danger btn-sm" value="ok">Tutup laporan</button></div>
+        </form>
+      </dialog>
+    </main>
+  </div>
+</body>
+</html>
