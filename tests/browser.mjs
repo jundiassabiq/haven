@@ -144,19 +144,6 @@ try {
   await a.go("/");
   check("beranda memuat 3 layanan lewat fetch", await waitFor(a.ev, `document.querySelectorAll("[data-directory-list] .service").length === 3`));
 
-  // ---------- Quiz ----------
-  console.log("Kuis (satu soal per langkah)");
-  await a.go("/kuis/kenali-kekerasan-seksual/kerjakan");
-  check("hanya soal pertama yang tampil", await a.ev(`return [...document.querySelectorAll("[data-quiz-step]")].filter((s) => !s.hidden).length === 1`));
-  check("tombol Berikutnya nonaktif sebelum menjawab", await a.ev(`return document.querySelector("[data-quiz-next]").disabled === true`));
-  await a.ev(`{ const i = document.querySelector("[data-quiz-step] input"); i.checked = true; i.dispatchEvent(new Event("change", { bubbles: true })); } document.querySelector("[data-quiz-next]").click()`);
-  check("pindah ke soal 2, progres bertambah", await a.ev(`return document.querySelector("[data-quiz-pos]").textContent === "Soal 2 dari 10" && document.querySelector(".progress span").style.width === "10%"`));
-  await a.ev(`document.querySelectorAll("[data-quiz-step]").forEach((s) => { const i = s.querySelector("input"); i.checked = true; }); document.querySelectorAll("[data-quiz-step]")[4].querySelectorAll("input").forEach((i) => (i.checked = false)); [...document.querySelectorAll("[data-quiz-step]")].forEach((s, k) => (s.hidden = k !== 9)); document.querySelector("[data-quiz-finish]").hidden = false; document.querySelector("form[data-quiz]").requestSubmit()`);
-  await sleep(300);
-  check("kirim dengan soal kosong membuka soal itu", await a.ev(`return location.pathname.endsWith("/kerjakan") && document.querySelector("[data-quiz-pos]").textContent === "Soal 5 dari 10"`));
-  await a.ev(`{ const i = document.querySelectorAll("[data-quiz-step]")[4].querySelector("input"); i.checked = true; } document.querySelector("form[data-quiz]").requestSubmit()`);
-  check("hasil kuis dihitung server", await waitFor(a.ev, `location.pathname.startsWith("/kuis/hasil/") && document.querySelector(".score b")`));
-
   // ---------- Admin charts ----------
   console.log("Grafik statistik");
   const adm = await newPage("admin");

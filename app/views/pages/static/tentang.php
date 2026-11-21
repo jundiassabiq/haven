@@ -14,7 +14,7 @@
           <ul class="proof-points">
             <li><svg class="icon icon-lg" aria-hidden="true"><use href="#i-file"/></svg><div><h3 class="h4">Lapor tanpa nama</h3><p>Kamu menerima kode dan PIN untuk membuka laporanmu lagi. Jika punya akun, laporan juga bisa disimpan di sana. Kronologi dan kontak dienkripsi.</p></div></li>
             <li><svg class="icon icon-lg" aria-hidden="true"><use href="#i-message"/></svg><div><h3 class="h4">Pendampingan</h3><p>Satu pendamping per kasus. Kalian berkirim pesan di dalam Haven, menjadwalkan panggilan, dan pendamping merujukmu ke lembaga resmi bila kamu setuju.</p></div></li>
-            <li><svg class="icon icon-lg" aria-hidden="true"><use href="#i-book"/></svg><div><h3 class="h4">Edukasi</h3><p>Tujuh artikel dan satu kuis yang menjelaskan UU TPKS dengan contoh sehari-hari, termasuk cara menanggapi teman yang bercerita.</p></div></li>
+            <li><svg class="icon icon-lg" aria-hidden="true"><use href="#i-book"/></svg><div><h3 class="h4">Edukasi</h3><p>Tujuh artikel yang menjelaskan UU TPKS dengan contoh sehari-hari, termasuk cara menanggapi teman yang bercerita.</p></div></li>
           </ul>
         </div>
       </div>
@@ -43,7 +43,7 @@
         <ul class="article-grid">
           <li class="stack-sm"><span class="avatar" style="width:64px;height:64px;font-size:1.25rem" aria-hidden="true">A</span><h3 class="h4">Anggota A</h3><p class="muted small">NIM ·  Pelaporan, lacak laporan, autentikasi, keamanan inti</p></li>
           <li class="stack-sm"><span class="avatar" style="width:64px;height:64px;font-size:1.25rem" aria-hidden="true">B</span><h3 class="h4">Anggota B</h3><p class="muted small">NIM · Manajemen kasus, jadwal, pesan aman, notifikasi</p></li>
-          <li class="stack-sm"><span class="avatar" style="width:64px;height:64px;font-size:1.25rem" aria-hidden="true">C</span><h3 class="h4">Anggota C</h3><p class="muted small">NIM · Edukasi, kuis, direktori layanan, statistik, UI</p></li>
+          <li class="stack-sm"><span class="avatar" style="width:64px;height:64px;font-size:1.25rem" aria-hidden="true">C</span><h3 class="h4">Anggota C</h3><p class="muted small">NIM · Edukasi, direktori layanan, statistik, UI</p></li>
         </ul>
         <div class="alert alert-info" style="margin-top:48px">
           <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>

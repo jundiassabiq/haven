@@ -39,7 +39,7 @@ Setiap anggota memperkenalkan diri: nama, NIM, dan modul yang dikerjakan (lihat 
 
 ## 2:30 Arsitektur & modul (B)
 - Tampilkan bagan alur di README: HTML/CSS/JS vanilla → `public/index.php` → Router → Controller → Model (PDO) → MySQL.
-- Sebutkan 11 modul dan bahwa semuanya terhubung lewat satu alur kasus.
+- Sebutkan 10 modul dan bahwa semuanya terhubung lewat satu alur kasus.
 - Tunjukkan diagram status: Diterima → Ditinjau → Didampingi → Dirujuk → Selesai.
 
 ## 3:30 Demo
@@ -88,7 +88,7 @@ Setiap anggota memperkenalkan diri: nama, NIM, dan modul yang dikerjakan (lihat 
 - Jalankan `C:\xampp\php\php.exe tests\run.php` di terminal: 105 tes lulus.
 
 ## 8:30 Kesimpulan (semua)
-- Haven memenuhi 11 modul yang saling terhubung, dari pelaporan sampai statistik.
+- Haven memenuhi 10 modul yang saling terhubung, dari pelaporan sampai statistik.
 - Data korban dilindungi dengan enkripsi, pembatasan akses, dan audit log.
 - Rencana lanjutan: verifikasi data layanan bersama UPTD PPA Banyumas, notifikasi email nyata, dan uji coba dengan Satgas PPKPT kampus.
 - Tutup dengan pesan: "Jika kamu dalam bahaya sekarang, telepon 112 atau SAPA 129."

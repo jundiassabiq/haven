@@ -6,7 +6,7 @@
   <div class="auth-panel">
     <div class="auth-form">
       <h1 class="h2">Buat akun</h1>
-      <p>Dengan akun, kamu tidak perlu mengingat kode dan PIN. Semua laporan, pesan, jadwal, dan riwayat kuismu tersimpan di satu dasbor.</p>
+      <p>Dengan akun, kamu tidak perlu mengingat kode dan PIN. Semua laporan, pesan, dan jadwalmu tersimpan di satu dasbor.</p>
       <form class="form-stack" method="post" action="<?= e(url('/daftar')) ?>" novalidate data-validate>
         <?= csrf_field() ?>
         <div class="field">

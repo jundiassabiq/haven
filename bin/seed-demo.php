@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 /*
  * Fills a freshly reset database with realistic demo activity for the presentation video:
- * ~45 reports over the last 12 months, messages, notes, referrals, sessions, and quiz attempts.
+ * ~45 reports over the last 12 months, messages, notes, referrals, and sessions.
  * Report content is encrypted with this installation's APP_KEY, which is why this is a PHP script and not SQL.
  *
  *   php bin/db-reset.php && php bin/seed-demo.php
@@ -180,22 +180,7 @@ Database::run('UPDATE reports SET code = ?, pin_hash = ?, urgency = ? WHERE id =
 Notifier::admins((int) $aCase['id'], 'laporan', 'Laporan baru: HV-9B2X6P (menyatakan dalam bahaya)', '/admin/kasus/HV-9B2X6P');
 $created++;
 
-// ---------- Quiz attempts ----------
-$qs = Quiz::questions(1, true);
-for ($i = 0; $i < 36; $i++) {
-    $ans = [];
-    foreach ($qs as $q) {
-        $right = array_values(array_filter($q['options'], static fn ($o) => (int) $o['is_correct']))[0]['id'];
-        $wrong = array_values(array_filter($q['options'], static fn ($o) => !(int) $o['is_correct']))[mt_rand(0, 2)]['id'];
-        $hard = in_array((int) $q['position'], [3, 8], true);
-        $ans[$q['id']] = mt_rand(1, 100) <= ($hard ? 55 : 85) ? $right : $wrong;
-    }
-    $res = Quiz::score($qs, $ans);
-    $id = Quiz::saveAttempt(1, $i === 0 ? (int) $rani['id'] : null, $res, $ans);
-    Database::run('UPDATE quiz_attempts SET created_at = ? WHERE id = ?', [$at(time() - mt_rand(1, 90) * 86400), $id]);
-}
-
 echo "Data demo dibuat: $created laporan, " . Database::value('SELECT COUNT(*) FROM messages') . ' pesan, '
-    . Database::value('SELECT COUNT(*) FROM bookings') . " sesi, 36 percobaan kuis.\n";
+    . Database::value('SELECT COUNT(*) FROM bookings') . " sesi.\n";
 echo "  HV-9B2X6P / PIN 482915  anonim, dalam bahaya, menunggu di antrean admin\n";
 echo "  HV-7Q4K2M               laporan berakun Rani (rani@demo.id), didampingi Dewi, sesi besok 10.00\n";

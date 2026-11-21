@@ -2,7 +2,7 @@
 
 **Layanan pelaporan, pendampingan, dan edukasi untuk penyintas kekerasan seksual.**
 
-Haven adalah aplikasi web tempat penyintas bisa melapor tanpa harus menyebut nama, didampingi satu pendamping per kasus lewat pesan terenkripsi dan jadwal panggilan, lalu dirujuk ke layanan resmi seperti UPTD PPA, rumah sakit, atau bantuan hukum. Haven juga menyediakan artikel dan kuis edukasi berdasarkan UU No. 12 Tahun 2022 tentang Tindak Pidana Kekerasan Seksual (UU TPKS).
+Haven adalah aplikasi web tempat penyintas bisa melapor tanpa harus menyebut nama, didampingi satu pendamping per kasus lewat pesan terenkripsi dan jadwal panggilan, lalu dirujuk ke layanan resmi seperti UPTD PPA, rumah sakit, atau bantuan hukum. Haven juga menyediakan artikel edukasi berdasarkan UU No. 12 Tahun 2022 tentang Tindak Pidana Kekerasan Seksual (UU TPKS).
 
 Proyek akhir Responsi 2 Praktikum Pemrograman Web I, Jurusan Informatika, Fakultas Teknik, Universitas Jenderal Soedirman, 2026.
 
@@ -33,7 +33,7 @@ Banyak kasus kekerasan seksual tidak pernah dilaporkan. Tiga alasan yang paling 
 
 ---
 
-## 2. Modul dan fitur (11 modul)
+## 2. Modul dan fitur (10 modul)
 
 | No | Modul | Fitur utama |
 |---|---|---|
@@ -44,7 +44,6 @@ Banyak kasus kekerasan seksual tidak pernah dilaporkan. Tiga alasan yang paling 
 | 5 | **Jadwal Pendampingan** | Pendamping membuka slot (suara/video/tatap muka), penyintas memesan dan membatalkan, satu slot tidak bisa dipesan dua kali (transaksi + `SELECT … FOR UPDATE`) |
 | 6 | **Pesan Aman** | Percakapan per kasus, isi terenkripsi, pembaruan otomatis tiap 5 detik lewat `fetch`, tanda dibaca |
 | 7 | **Edukasi** | 7 artikel orisinal, kategori, pencarian, CMS admin (draf/terbit, sampul, pratinjau) |
-| 8 | **Kuis Edukasi** | 10 soal, skor dihitung di server (kunci jawaban tidak pernah dikirim ke browser), pembahasan, riwayat, pengelolaan soal |
 | 9 | **Direktori Layanan** | Filter provinsi/kota/jenis/24 jam, kontak hanya tampil setelah diverifikasi, dipakai untuk rujukan kasus |
 | 10 | **Dashboard & Statistik** | Dashboard per peran, grafik `<canvas>` dari endpoint JSON, kategori dengan kurang dari 5 kasus digabung demi privasi |
 | 11 | **Notifikasi & Audit Log** | Lonceng notifikasi, notifikasi untuk penyintas anonim, audit log setiap akses ke data laporan |
@@ -61,7 +60,7 @@ Pendamping ◄─► Penyintas: Pesan (6) + Jadwal (5)
    │
    ▼
 Rujukan ke Direktori (9) ─► Selesai
-Edukasi (7) & Kuis (8) ditautkan dari beranda, laporan, dan hasil kuis. Statistik (10) dihitung dari semua modul.
+Edukasi (7) ditautkan dari beranda dan laporan. Statistik (10) dihitung dari semua modul.
 ```
 
 ### Status kasus
@@ -110,7 +109,7 @@ Buka `.env` dan sesuaikan `DB_USER`/`DB_PASS` jika MySQL kamu memakai kata sandi
 # 3. Nyalakan MySQL di XAMPP Control Panel, lalu buat tabel + data awal
 C:\xampp\php\php.exe bin\db-reset.php
 
-# 4. (Opsional, disarankan untuk demo) isi aktivitas contoh: 49 laporan, pesan, sesi, percobaan kuis
+# 4. (Opsional, disarankan untuk demo) isi aktivitas contoh: 49 laporan, pesan, sesi
 C:\xampp\php\php.exe bin\seed-demo.php
 ```
 
@@ -163,7 +162,7 @@ Email (reset kata sandi, undangan) tidak benar-benar dikirim. Isinya ditulis ke 
 C:\xampp\php\php.exe tests\run.php                                                   # 105 unit test
 C:\xampp\php\php.exe bin\db-reset.php; powershell -ExecutionPolicy Bypass -File tests\smoke.ps1          # akun
 C:\xampp\php\php.exe bin\db-reset.php; powershell -ExecutionPolicy Bypass -File tests\smoke-cases.ps1    # modul 2 sampai 6, 9, 11
-C:\xampp\php\php.exe bin\db-reset.php; powershell -ExecutionPolicy Bypass -File tests\smoke-content.ps1  # modul 7, 8, 10
+C:\xampp\php\php.exe bin\db-reset.php; powershell -ExecutionPolicy Bypass -File tests\smoke-content.ps1  # modul 7, 10
 C:\xampp\php\php.exe bin\db-reset.php; node tests\browser.mjs                        # JavaScript di Edge headless
 ```
 Skrip end-to-end butuh server berjalan di `127.0.0.1:8000` dan database yang baru di-reset.
@@ -184,7 +183,7 @@ app/
   core/         Router, App, View, Database, Session, Csrf, Crypto, Validator, RateLimiter,
                 Auth, Audit, Notifier, CaseWorkflow, CaseAccess, Upload, Markup, …
   controllers/  satu controller per modul
-  models/       Report, Message, Slot, Booking, Service, Article, Quiz, Stats, …
+  models/       Report, Message, Slot, Booking, Service, Article, Stats, …
   views/        layouts/, partials/, pages/
   routes.php    seluruh rute
 database/       schema.sql, seed.sql, seed-content.sql
@@ -200,7 +199,7 @@ docs/           demo-script.md
 |---|---|---|
 | Anggota A | (isi) | Modul 1 sampai 3 dan keamanan inti (enkripsi, CSRF, rate limit) |
 | Anggota B | (isi) | Modul 4, 5, 6, 11 |
-| Anggota C | (isi) | Modul 7 sampai 10 dan antarmuka |
+| Anggota C | (isi) | Modul 7, 9, 10 dan antarmuka |
 
 Isi nama dan NIM di tabel ini dan di `app/views/pages/static/tentang.php`.
 
@@ -210,4 +209,4 @@ Isi nama dan NIM di tabel ini dan di `app/views/pages/static/tentang.php`.
 - Kementerian PPPA dan layanan SAPA 129: https://www.kemenpppa.go.id/
 - LPSK: https://www.lpsk.go.id/
 
-Seluruh teks artikel dan kuis ditulis sendiri untuk proyek ini. Foto berasal dari Pexels.
+Seluruh teks artikel ditulis sendiri untuk proyek ini. Foto berasal dari Pexels.

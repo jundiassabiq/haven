@@ -5,7 +5,6 @@ $nav = [
     ['lapor', '/lapor', 'Lapor'],
     ['lacak', '/lacak', 'Lacak laporan'],
     ['edukasi', '/edukasi', 'Edukasi'],
-    ['kuis', '/kuis', 'Kuis'],
     ['layanan', '/layanan', 'Layanan bantuan'],
     ['tentang', '/tentang', 'Tentang'],
 ];

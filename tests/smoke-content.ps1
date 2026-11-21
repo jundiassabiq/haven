@@ -1,4 +1,4 @@
-# End-to-end test for Tasks 11–13: education, quiz, statistics. Needs a running server and a freshly reset database.
+# End-to-end test for Tasks 11–13: education, statistics. Needs a running server and a freshly reset database.
 #   C:\xampp\php\php.exe bin\db-reset.php
 #   powershell -ExecutionPolicy Bypass -File tests\smoke-content.ps1
 param([string]$B = "http://127.0.0.1:8000")
@@ -37,35 +37,6 @@ Check "sampul tersaji" ((curl.exe -s -o NUL -w "%{http_code}" "$B/$cover") -eq "
 $r = Post adm "/admin/artikel" "/admin/artikel/$aid/hapus" @{}; Check "artikel dihapus beserta sampulnya" ((Flash $r) -like "*dihapus." -and -not (Test-Path "$PSScriptRoot\..\public\$cover"))
 $null = Login dewi "dewi@demo.id"
 Check "pendamping tidak bisa membuka CMS artikel" ((Req dewi "/admin/artikel").code -eq 403)
-
-"Modul 8: Kuis"
-$r = Req g "/kuis"; Check "halaman kuis" ((Has $r "Kuis: kekerasan seksual dan UU TPKS") -and (Has $r "/kuis/kenali-kekerasan-seksual/kerjakan"))
-$r = Req g "/kuis/kenali-kekerasan-seksual/kerjakan"; Check "10 soal dirender" (([regex]::Matches($r.body, 'data-quiz-step')).Count -eq 10)
-Check "kunci jawaban tidak dikirim ke browser" (-not (Has $r "is_correct") -and -not ($r.body -match 'data-correct'))
-$opts = [regex]::Matches($r.body, 'name="jawaban\[(\d+)\]" value="(\d+)"') | ForEach-Object { @{ q = $_.Groups[1].Value; o = $_.Groups[2].Value } }
-$correct = @{}; (Sql "SELECT CONCAT(question_id, ':', id) FROM quiz_options WHERE is_correct=1") -split "`n" | ForEach-Object { $p = $_.Trim().Split(":"); $correct[$p[0]] = $p[1] }
-$partial = @{}; $partial["jawaban[1]"] = $correct["1"]
-$r = Post g "/kuis/kenali-kekerasan-seksual/kerjakan" "/kuis/kenali-kekerasan-seksual" $partial; Check "jawaban belum lengkap ditolak" ((Flash $r) -like "Masih ada 9 soal*" -and $r.url -like "/kuis/*/kerjakan")
-Check "jawaban yang sudah dipilih tetap terpilih" ($r.body -match "value=`"$($correct['1'])`" required[^>]*checked|value=`"$($correct['1'])`" checked")
-$ans = @{}; foreach ($q in $correct.Keys) { $ans["jawaban[$q]"] = $correct[$q] }
-$wrongQ = ($opts | Where-Object { $_.q -eq "3" -and $_.o -ne $correct["3"] } | Select-Object -First 1).o; $ans["jawaban[3]"] = $wrongQ
-$r = Post g "/kuis/kenali-kekerasan-seksual/kerjakan" "/kuis/kenali-kekerasan-seksual" $ans; Check "skor dihitung di server: 9/10" ($r.url -like "/kuis/hasil/*" -and (Has $r '<b>9</b>'))
-Check "pembahasan + artikel terkait untuk jawaban salah" ((Has $r "Jawabanmu:") -and (Has $r "/edukasi/kekerasan-berbasis-elektronik"))
-$attempt = $r.url.Split("/")[-1]
-Check "hasil orang lain tidak bisa dibuka" ((Req other "/kuis/hasil/$attempt").code -eq 404)
-$cheat = $ans.Clone(); $cheat["jawaban[1]"] = $correct["2"]
-$r = Post g "/kuis/kenali-kekerasan-seksual/kerjakan" "/kuis/kenali-kekerasan-seksual" $cheat; Check "opsi dari soal lain tidak dihitung (dianggap belum dijawab)" ((Flash $r) -like "Masih ada 1 soal*")
-$null = Login rani "rani@demo.id"
-$r = Post rani "/kuis/kenali-kekerasan-seksual/kerjakan" "/kuis/kenali-kekerasan-seksual" $ans
-Check "percobaan penyintas tersimpan di akunnya" ((Sql "SELECT COUNT(*) FROM quiz_attempts WHERE user_id=3") -eq "1")
-$r = Req rani "/penyintas"; Check "riwayat kuis di dashboard penyintas" ((Has $r "Riwayat kuis") -and (Has $r "9 / 10 benar"))
-$r = Req adm "/admin/kuis"; Check "admin: tingkat benar per soal" ((Has $r "100%") -and (Has $r 'data-urgency="tinggi">0%'))
-$r = Post adm "/admin/kuis/soal/baru" "/admin/kuis/soal" @{ question = "Soal uji?"; explanation = "Pembahasan."; position = "11"; correct = "3"; "options[0]" = "A"; "options[1]" = "B"; "options[2]" = ""; "options[3]" = "" }; Check "kunci jawaban harus pilihan yang terisi" (Has $r "Tandai satu jawaban benar")
-$r = Post adm "/admin/kuis/soal/baru" "/admin/kuis/soal" @{ question = "Soal uji?"; explanation = "Pembahasan."; position = "11"; correct = "1"; "options[0]" = "A"; "options[1]" = "B"; "options[2]" = ""; "options[3]" = "" }; Check "soal baru ditambahkan" ((Flash $r) -eq "Soal ditambahkan.")
-$qid = Sql "SELECT id FROM quiz_questions WHERE question='Soal uji?'"
-Check "hanya opsi terisi yang disimpan, kunci benar" ((Sql "SELECT GROUP_CONCAT(CONCAT(label,is_correct) ORDER BY position) FROM quiz_options WHERE question_id=$qid") -eq "A0,B1")
-$r = Req g "/kuis/kenali-kekerasan-seksual/kerjakan"; Check "soal baru muncul di kuis" (([regex]::Matches($r.body, 'data-quiz-step')).Count -eq 11)
-$r = Post adm "/admin/kuis/soal/$qid" "/admin/kuis/soal/$qid/hapus" @{}; Check "soal dihapus" ((Flash $r) -like "Soal dihapus*")
 
 "Modul 10: Statistik"
 $r = Req adm "/admin"; Check "dashboard admin: KPI & kanvas grafik" ((Has $r "Laporan masuk") -and ([regex]::Matches($r.body, 'data-chart-key=')).Count -eq 3)

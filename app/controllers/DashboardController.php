@@ -21,7 +21,6 @@ final class DashboardController
             'reports' => array_slice(Report::forUser((int) $u['id']), 0, 3),
             'upcoming' => array_slice($upcoming, 0, 2),
             'k' => Stats::survivor((int) $u['id']),
-            'quiz' => Quiz::attemptsFor((int) $u['id'], 3),
             'lastLogin' => $this->lastLogin((int) $u['id']),
         ], 'app');
     }

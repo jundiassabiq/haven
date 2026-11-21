@@ -1,4 +1,4 @@
-<?php /** @var array $user  @var array $reports  @var array $upcoming  @var array $k  @var array $quiz */ ?>
+<?php /** @var array $user  @var array $reports  @var array $upcoming  @var array $k */ ?>
 <div class="app-page-head">
   <div>
     <h1 class="app-title">Halo, <?= e($user['name']) ?>.</h1>
@@ -46,17 +46,6 @@
       <div class="panel-body stack-sm">
         <a class="text-link" href="<?= e(url('/edukasi/sembilan-bentuk-kekerasan-seksual')) ?>">Sembilan bentuk kekerasan seksual menurut UU TPKS <?= icon('arrow-right') ?></a>
         <a class="text-link" href="<?= e(url('/edukasi/hak-korban')) ?>">Hak-hakmu sebagai korban <?= icon('arrow-right') ?></a>
-        <a class="text-link" href="<?= e(url('/kuis')) ?>">Kerjakan kuis 10 soal <?= icon('arrow-right') ?></a>
-        <?php if ($quiz): ?>
-          <div style="margin-top:12px;padding-top:16px;border-top:1px solid var(--line)">
-            <p class="h4">Riwayat kuis</p>
-            <ul class="stack-sm small" style="margin-top:8px">
-              <?php foreach ($quiz as $h): ?>
-                <li class="row-between"><span class="mono"><?= e(mb_strtoupper(id_date($h['created_at']))) ?></span><a class="link-btn" href="<?= e(url('/kuis/hasil/' . $h['id'])) ?>"><?= (int) $h['score'] ?> / <?= (int) $h['total'] ?> benar</a></li>
-              <?php endforeach; ?>
-            </ul>
-          </div>
-        <?php endif; ?>
       </div>
     </section>
   </div>

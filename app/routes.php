@@ -103,18 +103,6 @@ return static function (Router $r): void {
     $r->get('/admin/artikel/{id}/pratinjau', [AdminArticleController::class, 'preview'], ['role:admin']);
     $r->post('/admin/artikel/{id}/hapus', [AdminArticleController::class, 'delete'], ['role:admin']);
 
-    // Module 8: quiz (scored on the server)
-    $r->get('/kuis', [QuizController::class, 'intro']);
-    $r->get('/kuis/hasil/{id}', [QuizController::class, 'result']);
-    $r->get('/kuis/{slug}/kerjakan', [QuizController::class, 'take']);
-    $r->post('/kuis/{slug}', [QuizController::class, 'submit']);
-    $r->get('/admin/kuis', [AdminQuizController::class, 'index'], ['role:admin']);
-    $r->get('/admin/kuis/soal/baru', [AdminQuizController::class, 'create'], ['role:admin']);
-    $r->post('/admin/kuis/soal', [AdminQuizController::class, 'store'], ['role:admin']);
-    $r->get('/admin/kuis/soal/{id}', [AdminQuizController::class, 'edit'], ['role:admin']);
-    $r->post('/admin/kuis/soal/{id}', [AdminQuizController::class, 'update'], ['role:admin']);
-    $r->post('/admin/kuis/soal/{id}/hapus', [AdminQuizController::class, 'delete'], ['role:admin']);
-
     // Module 10: statistics (JSON for the admin charts)
     $r->get('/api/statistik', [DashboardController::class, 'adminApi'], ['role:admin']);
 };

@@ -12,7 +12,6 @@
       </ul></nav>
       <nav aria-label="Belajar"><h2 class="footer-h">Belajar</h2><ul>
         <li><a href="<?= e(url('/edukasi')) ?>">Edukasi</a></li>
-        <li><a href="<?= e(url('/kuis')) ?>">Kuis</a></li>
         <li><a href="<?= e(url('/tips-aman')) ?>">Tips menjelajah aman</a></li>
       </ul></nav>
       <nav aria-label="Tentang"><h2 class="footer-h">Tentang</h2><ul>

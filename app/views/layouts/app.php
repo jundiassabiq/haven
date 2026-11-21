@@ -43,7 +43,6 @@ $menus = [
         ]],
         ['Konten', [
             ['artikel', '/admin/artikel', 'book', 'Artikel'],
-            ['kuis', '/admin/kuis', 'quiz', 'Kuis'],
             ['layanan', '/admin/layanan', 'building', 'Layanan'],
         ]],
         ['Keamanan', [

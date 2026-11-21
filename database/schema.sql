@@ -206,52 +206,6 @@ CREATE TABLE articles (
   CONSTRAINT fk_articles_author FOREIGN KEY (author_id)   REFERENCES users (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------- Module 8: quiz ----------
-CREATE TABLE quizzes (
-  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  slug        VARCHAR(80)  NOT NULL,
-  title       VARCHAR(160) NOT NULL,
-  description TEXT         NOT NULL,
-  status      ENUM('draf','terbit') NOT NULL DEFAULT 'terbit',
-  created_at  DATETIME     NOT NULL,
-  UNIQUE KEY uq_quizzes_slug (slug)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE quiz_questions (
-  id                 INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  quiz_id            INT UNSIGNED      NOT NULL,
-  position           SMALLINT UNSIGNED NOT NULL,
-  question           TEXT              NOT NULL,
-  explanation        TEXT              NOT NULL,
-  related_article_id INT UNSIGNED      NULL,
-  KEY idx_questions_quiz (quiz_id, position),
-  CONSTRAINT fk_questions_quiz    FOREIGN KEY (quiz_id)            REFERENCES quizzes (id)  ON DELETE CASCADE,
-  CONSTRAINT fk_questions_article FOREIGN KEY (related_article_id) REFERENCES articles (id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE quiz_options (
-  id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  question_id INT UNSIGNED     NOT NULL,
-  position    TINYINT UNSIGNED NOT NULL,
-  label       VARCHAR(255)     NOT NULL,
-  is_correct  TINYINT(1)       NOT NULL DEFAULT 0,
-  KEY idx_options_q (question_id, position),
-  CONSTRAINT fk_options_question FOREIGN KEY (question_id) REFERENCES quiz_questions (id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE quiz_attempts (
-  id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  quiz_id    INT UNSIGNED      NOT NULL,
-  user_id    INT UNSIGNED      NULL,
-  score      SMALLINT UNSIGNED NOT NULL,
-  total      SMALLINT UNSIGNED NOT NULL,
-  answers    TEXT              NOT NULL COMMENT 'JSON {question_id: option_id}',
-  created_at DATETIME          NOT NULL,
-  KEY idx_attempts_user (user_id, created_at),
-  CONSTRAINT fk_attempts_quiz FOREIGN KEY (quiz_id) REFERENCES quizzes (id) ON DELETE CASCADE,
-  CONSTRAINT fk_attempts_user FOREIGN KEY (user_id) REFERENCES users (id)   ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 -- ---------- Module 11: notifications & audit ----------
 CREATE TABLE notifications (
   id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

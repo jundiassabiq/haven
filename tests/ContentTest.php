@@ -50,46 +50,6 @@ test('slugify', function () {
     assert_same('uu-tpks-2022', Article::slugify('UU TPKS (2022)'));
 });
 
-function quiz_fixture(): array
-{
-    return [
-        ['id' => 1, 'options' => [['id' => 10, 'is_correct' => 0], ['id' => 11, 'is_correct' => 1]]],
-        ['id' => 2, 'options' => [['id' => 20, 'is_correct' => 1], ['id' => 21, 'is_correct' => 0]]],
-        ['id' => 3, 'options' => [['id' => 30, 'is_correct' => 0], ['id' => 31, 'is_correct' => 1]]],
-    ];
-}
-
-test('quiz score: counts correct answers', function () {
-    $r = Quiz::score(quiz_fixture(), [1 => 11, 2 => 21, 3 => 31]);
-    assert_same(2, $r['score']);
-    assert_same(3, $r['total']);
-    assert_same([true, false, true], array_column($r['items'], 'right'));
-    assert_same(20, $r['items'][1]['correct']);
-});
-
-test('quiz score: string keys from $_POST work', function () {
-    assert_same(3, Quiz::score(quiz_fixture(), ['1' => '11', '2' => '20', '3' => '31'])['score']);
-});
-
-test('quiz score: missing answers are wrong, not errors', function () {
-    $r = Quiz::score(quiz_fixture(), [1 => 11]);
-    assert_same(1, $r['score']);
-    assert_same(null, $r['items'][2]['chosen']);
-});
-
-test("quiz score: an option from another question cannot be used to cheat", function () {
-    $r = Quiz::score(quiz_fixture(), [1 => 20, 2 => 11, 3 => 'x']);
-    assert_same(0, $r['score']);
-    assert_same([null, null, null], array_column($r['items'], 'chosen'));
-});
-
-test('quiz question validation', function () {
-    $ok = ['question' => 'Apa?', 'explanation' => 'Karena.', 'position' => '1', 'correct' => '1', 'options' => ['A', 'B', '', '']];
-    assert_same([], Quiz::questionErrors($ok));
-    assert_true(isset(Quiz::questionErrors(['options' => ['A', '', '', '']] + $ok)['options']));
-    assert_true(isset(Quiz::questionErrors(['correct' => '2'] + $ok)['options']), 'correct answer must be a filled option');
-});
-
 test('stats: categories under 5 are merged into "Lainnya"', function () {
     $m = Stats::mergeSmall(['A' => 20, 'B' => 7, 'C' => 3, 'D' => 2, 'E' => 1]);
     assert_same(['A', 'B', 'Lainnya (< 5 digabung)'], $m['labels']);

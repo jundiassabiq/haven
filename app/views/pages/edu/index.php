@@ -41,14 +41,4 @@
       <?php endif; ?>
     </div>
   </section>
-
-  <section class="section-sm" style="background:var(--yellow)">
-    <div class="container row-between">
-      <div>
-        <h2 class="h3">Kuis 10 soal</h2>
-        <p style="margin-top:8px">Sekitar 5 menit. Setiap jawaban yang salah diberi pembahasan dan tautan ke artikelnya.</p>
-      </div>
-      <a class="btn btn-ink" href="<?= e(url('/kuis')) ?>">Kerjakan kuis</a>
-    </div>
-  </section>
 </main>

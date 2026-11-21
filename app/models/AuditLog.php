@@ -22,7 +22,7 @@ final class AuditLog
         'user.activate' => 'Mengaktifkan akun', 'user.deactivate' => 'Menonaktifkan akun', 'user.reset_link' => 'Mengirim tautan reset',
         'message.send' => 'Mengirim pesan', 'booking.create' => 'Memesan sesi', 'booking.cancel' => 'Membatalkan sesi',
         'slot.create' => 'Membuka slot', 'slot.delete' => 'Menghapus slot', 'service.save' => 'Menyimpan layanan', 'service.delete' => 'Menghapus layanan',
-        'article.save' => 'Menyimpan artikel', 'article.delete' => 'Menghapus artikel', 'quiz.save' => 'Menyimpan soal kuis', 'quiz.delete' => 'Menghapus soal kuis',
+        'article.save' => 'Menyimpan artikel', 'article.delete' => 'Menghapus artikel',
     ];
 
     private static function where(array $f): array

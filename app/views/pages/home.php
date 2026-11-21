@@ -162,10 +162,6 @@
             </div>
           </div>
         </div>
-        <div class="why-cta">
-          <p>Kuis 10 soal tentang consent, bentuk kekerasan, dan hak korban. Setiap soal punya pembahasan. Tidak perlu akun.</p>
-          <a class="btn btn-ink" href="<?= e(url('/kuis')) ?>">Kerjakan kuis</a>
-        </div>
       </div>
     </section>
 

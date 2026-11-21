@@ -49,8 +49,7 @@ Merekam atau mengambil gambar bermuatan seksual tanpa izin, menyebarkan konten s
 ## Kalau kamu mengenali salah satunya
 Kamu tidak harus langsung melapor ke polisi. Kamu boleh mulai dengan bercerita ke orang yang kamu percaya, atau [membuat laporan anonim di Haven](/lapor) untuk mendapat pendamping. Pendamping bisa membantumu memahami pilihan, termasuk layanan kesehatan, psikologis, dan bantuan hukum.
 
-- [Cari layanan bantuan terdekat](/layanan)
-- [Uji pemahamanmu dengan kuis](/kuis)',
+- [Cari layanan bantuan terdekat](/layanan)',
 'UU RI No. 12 Tahun 2022 tentang Tindak Pidana Kekerasan Seksual, Pasal 4 ayat (1), JDIH BPK | https://peraturan.bpk.go.id/
 Komnas Perempuan, publikasi dan Catatan Tahunan | https://komnasperempuan.go.id/
 Kementerian Pemberdayaan Perempuan dan Perlindungan Anak | https://www.kemenpppa.go.id/',
@@ -240,33 +239,3 @@ Grooming juga bisa dilakukan orang yang punya kuasa, seperti pengajar, pembimbin
 Kementerian Pemberdayaan Perempuan dan Perlindungan Anak | https://www.kemenpppa.go.id/
 Komnas Perempuan | https://komnasperempuan.go.id/',
  'img/laptop.jpg', 'Tangan mengetik di laptop', 5, 'terbit', '2026-10-24 09:00:00', '2026-10-24 09:00:00', '2026-10-24 09:00:00');
-
--- ---------- Quiz (Task 12) ----------
-INSERT INTO quizzes (id, slug, title, description, status, created_at) VALUES
- (1, 'kenali-kekerasan-seksual', 'Kuis: kekerasan seksual dan UU TPKS',
-  'Sepuluh soal pilihan ganda tentang consent, bentuk kekerasan seksual dalam UU TPKS, hak korban, dan cara menanggapi teman yang bercerita. Setelah selesai, setiap soal diberi pembahasan.',
-  'terbit', '2026-11-01 09:00:00');
-
-INSERT INTO quiz_questions (id, quiz_id, position, question, explanation, related_article_id) VALUES
- (1, 1, 1, 'Menurut UU TPKS, mana yang termasuk tindak pidana kekerasan seksual?', 'UU TPKS mengakui pelecehan seksual nonfisik, misalnya ucapan, isyarat, atau tulisan bernuansa seksual yang merendahkan, sebagai salah satu tindak pidana kekerasan seksual.', 1),
- (2, 1, 2, 'Persetujuan (consent) yang sah adalah persetujuan yang…', 'Diam, takut, atau tidak sadar bukan tanda setuju. Persetujuan harus jelas, sukarela, dan boleh dicabut kapan pun.', 5),
- (3, 1, 3, 'Menyebarkan foto atau video intim seseorang tanpa izinnya termasuk…', 'UU TPKS mengatur kekerasan seksual berbasis elektronik, termasuk menyebarkan konten seksual seseorang tanpa persetujuannya, meskipun konten itu awalnya dibuat secara sukarela.', 6),
- (4, 1, 4, 'Temanmu bercerita bahwa ia mengalami pelecehan. Respons pertama yang paling membantu adalah…', 'Rasa dipercaya adalah langkah pertama pemulihan. Hindari pertanyaan yang menyalahkan, dan jangan bagikan cerita tanpa izinnya.', 4),
- (5, 1, 5, 'Apa yang dimaksud dengan grooming?', 'Grooming sering dimulai dengan perhatian berlebih, hadiah, dan permintaan merahasiakan sesuatu, lalu batasan korban perlahan dilanggar.', 7),
- (6, 1, 6, 'Setelah kejadian, langkah apa yang membantu menjaga bukti?', 'Bukti digital dan fisik bisa membantu bila kamu memutuskan melapor. Pemeriksaan kesehatan juga penting untuk dirimu sendiri, apa pun keputusanmu nanti.', 2),
- (7, 1, 7, 'UU TPKS menjamin hak korban atas…', 'Hak korban mencakup penanganan, pelindungan, dan pemulihan, termasuk layanan kesehatan, bantuan hukum, dan dukungan psikologis.', 3),
- (8, 1, 8, 'Siapa yang paling sering menjadi pelaku kekerasan seksual?', 'Banyak kasus dilakukan oleh orang yang dikenal korban, seperti pasangan, teman, keluarga, atau orang yang punya kuasa atas korban.', 1),
- (9, 1, 9, 'Siapa yang bisa menjadi korban kekerasan seksual?', 'Kekerasan seksual bisa menimpa siapa saja. Kesalahan selalu ada pada pelaku, bukan pada pakaian atau perilaku korban.', 1),
- (10, 1, 10, 'Nomor layanan pengaduan SAPA dari Kementerian PPPA adalah…', 'SAPA 129 menerima pengaduan kekerasan terhadap perempuan dan anak. Dalam keadaan darurat, hubungi 112.', 2);
-
-INSERT INTO quiz_options (question_id, position, label, is_correct) VALUES
- (1, 1, 'Hanya pemerkosaan', 0), (1, 2, 'Komentar bernuansa seksual yang merendahkan seseorang', 1), (1, 3, 'Hanya kekerasan yang meninggalkan luka fisik', 0), (1, 4, 'Hanya kejadian di tempat umum', 0),
- (2, 1, 'Diberikan sekali dan berlaku seterusnya', 0), (2, 2, 'Dianggap ada selama orang itu diam', 0), (2, 3, 'Diberikan secara sadar, tanpa tekanan, dan bisa ditarik kapan saja', 1), (2, 4, 'Tetap sah meski orang itu sedang mabuk berat', 0),
- (3, 1, 'Urusan pribadi yang tidak bisa dilaporkan', 0), (3, 2, 'Kekerasan seksual berbasis elektronik', 1), (3, 3, 'Hanya pelanggaran etika', 0), (3, 4, 'Bukan kekerasan jika fotonya dibuat atas kemauan korban', 0),
- (4, 1, 'Bertanya kenapa ia tidak melawan', 0), (4, 2, 'Mendengarkan tanpa menghakimi dan mengatakan bahwa kamu percaya', 1), (4, 3, 'Langsung membagikan ceritanya ke grup agar banyak yang membantu', 0), (4, 4, 'Menyarankan untuk melupakannya saja', 0),
- (5, 1, 'Merawat penampilan diri', 0), (5, 2, 'Proses pelaku membangun kedekatan dan kepercayaan untuk memanipulasi korban', 1), (5, 3, 'Pertemanan biasa antara orang dewasa dan anak', 0), (5, 4, 'Bimbingan belajar dari guru', 0),
- (6, 1, 'Menghapus semua pesan agar tidak teringat', 0), (6, 2, 'Menyimpan tangkapan layar dan pakaian dalam kantong kertas, lalu mencari layanan kesehatan', 1), (6, 3, 'Menunggu beberapa bulan sebelum memeriksakan diri', 0), (6, 4, 'Mencuci pakaian yang dikenakan', 0),
- (7, 1, 'Penanganan, pelindungan, dan pemulihan', 1), (7, 2, 'Hanya ganti rugi uang', 0), (7, 3, 'Hanya pendampingan saat sidang', 0), (7, 4, 'Tidak ada hak khusus', 0),
- (8, 1, 'Orang asing di jalan', 0), (8, 2, 'Orang yang dikenal korban', 1), (8, 3, 'Hanya orang dengan gangguan jiwa', 0), (8, 4, 'Tidak ada pola', 0),
- (9, 1, 'Hanya perempuan muda', 0), (9, 2, 'Hanya orang yang berpakaian terbuka', 0), (9, 3, 'Siapa pun, apa pun gender, usia, dan pakaiannya', 1), (9, 4, 'Hanya anak-anak', 0),
- (10, 1, '110', 0), (10, 2, '119', 0), (10, 3, '129', 1), (10, 4, '1500', 0);

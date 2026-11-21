@@ -702,35 +702,4 @@
       .then(redraw);
     if ("ResizeObserver" in window) { const ro = new ResizeObserver(() => redraw()); charts.forEach((c) => ro.observe(c.parentElement)); }
   }
-
-  /* ---------- Quiz: one question at a time over a server-rendered form (no answer key in the browser) ---------- */
-  const quizForm = $("form[data-quiz]");
-  if (quizForm) {
-    const steps = $$("[data-quiz-step]", quizForm);
-    const bar = $(".progress span", quizForm), pos = $("[data-quiz-pos]", quizForm);
-    const prev = $("[data-quiz-prev]", quizForm), next = $("[data-quiz-next]", quizForm), finish = $("[data-quiz-finish]", quizForm);
-    let i = 0;
-    const done = (s) => !!$("input:checked", s);
-    const show = (n, focus) => {
-      i = n;
-      steps.forEach((s, k) => (s.hidden = k !== n));
-      pos.textContent = `Soal ${n + 1} dari ${steps.length}`;
-      bar.style.width = `${(steps.filter(done).length / steps.length) * 100}%`;
-      prev.hidden = n === 0;
-      next.hidden = n === steps.length - 1;
-      finish.hidden = n !== steps.length - 1;
-      next.disabled = !done(steps[n]);
-      if (focus) $("legend", steps[n]).focus();
-    };
-    quizForm.addEventListener("change", () => show(i, false));
-    prev.addEventListener("click", () => show(i - 1, true));
-    next.addEventListener("click", () => { if (validate(steps[i])) show(i + 1, true); });
-    quizForm.addEventListener("submit", (e) => {
-      const bad = steps.findIndex((s) => !done(s));
-      if (bad >= 0) { e.preventDefault(); show(bad, true); validate(steps[bad]); return; }
-      finish.setAttribute("aria-busy", "true");
-    });
-    const firstErr = steps.findIndex((s) => s.querySelector('[aria-invalid="true"]'));
-    show(firstErr >= 0 ? firstErr : 0, firstErr >= 0);
-  }
 })();
