@@ -1,5 +1,5 @@
 <?php /** @var array $articles  @var array $categories  @var string $cat  @var string $q */ ?>
-<main id="main">
+<main id="konten" tabindex="-1">
   <section class="page-head">
     <div class="container">
       <h1 class="h2">Artikel tentang kekerasan seksual dan hak korban</h1>

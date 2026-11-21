@@ -18,6 +18,22 @@ final class Config
         'DB_USER'         => 'root',
         'DB_PASS'         => '',
         'SESSION_IDLE_MINUTES' => '30',
+        /*
+         * SMTP (Req 6.9, 6.10). Nilainya kosong di sini supaya pemasangan baru
+         * berjalan dalam mode `log`: tanpa MAIL_HOST dan MAIL_PORT, Mailer
+         * menulis email ke storage/mail.log dan tidak membuka koneksi.
+         *
+         * Kuncinya perlu terdaftar di sini, bukan hanya di .env, karena hanya
+         * kunci yang dikenal Config yang bisa ditimpa variabel lingkungan asli.
+         * Itu satu-satunya cara memberi MAIL_PASS tanpa menulisnya ke berkas.
+         */
+        'MAIL_HOST'       => '',
+        'MAIL_PORT'       => '',
+        'MAIL_USER'       => '',
+        'MAIL_PASS'       => '',
+        'MAIL_ENCRYPTION' => '',
+        'MAIL_FROM'       => '',
+        'MAIL_FROM_NAME'  => '',
     ];
 
     public static function load(string $envFile): void

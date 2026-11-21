@@ -44,15 +44,18 @@ final class DashboardController
     public function admin(): void
     {
         $u = Auth::user();
-        $range = isset(Stats::RANGES[input('rentang')]) ? input('rentang') : '12b';
+        $range = Stats::range(input('dari'), input('sampai'));
         View::show('pages/dashboard/admin', [
             'title' => 'Statistik | Admin Haven',
             'active' => 'dashboard',
             'user' => $u,
-            'range' => $range,
-            'k' => Stats::kpis($range),
+            // Teks berarti rentangnya tidak sah: halaman tidak menampilkan
+            // satu angka pun, hanya pesannya (Req 7.12).
+            'rangeError' => is_string($range) ? $range : null,
+            'range' => is_string($range) ? null : $range,
+            'agg' => is_string($range) ? null : Stats::aggregate($range),
+            'k' => Stats::kpis(),
             'workload' => Stats::workload(),
-            'hidden' => Stats::charts($range)['categories']['hidden'],
             'lastLogin' => $this->lastLogin((int) $u['id']),
         ], 'app');
     }
@@ -60,7 +63,10 @@ final class DashboardController
     /** Chart data for the admin dashboard (drawn on <canvas> by app.js). */
     public function adminApi(): void
     {
-        $range = isset(Stats::RANGES[input('rentang')]) ? input('rentang') : '12b';
+        $range = Stats::range(input('dari'), input('sampai'));
+        if (is_string($range)) {
+            json_response(['error' => $range], 422);
+        }
         json_response(Stats::charts($range));
     }
 }

@@ -1,4 +1,4 @@
-<main id="main">
+<main id="konten" tabindex="-1">
     <section class="page-head">
       <div class="container">
         <h1 class="h2">Haven adalah tempat melapor kekerasan seksual tanpa menyebut nama, lalu didampingi sampai ke layanan resmi.</h1>
@@ -8,7 +8,7 @@
 
     <section class="section">
       <div class="container proof-grid">
-        <div class="media" style="aspect-ratio:4/3;border-radius:6px"><img src="<?= asset('img/counseling.jpg') ?>" alt="Sesi konseling di ruang yang terang" width="1600" height="1067" loading="lazy"></div>
+        <?php if (!lite()): ?><div class="media" style="aspect-ratio:4/3;border-radius:6px"><img src="<?= asset('img/counseling.jpg') ?>" alt="Sesi konseling di ruang yang terang" width="1600" height="1067" loading="lazy"></div><?php endif; ?>
         <div>
           <h2 class="h2">Cara Haven bekerja</h2>
           <ul class="proof-points">
@@ -37,17 +37,12 @@
     <section class="section">
       <div class="container">
         <div class="help-head">
-          <h2 class="h2">Yang membuat Haven</h2>
-          <p class="lede">Tiga mahasiswa Informatika Universitas Jenderal Soedirman, sebagai proyek akhir Praktikum Pemrograman Web I.</p>
+          <h2 class="h2">Batas layanan Haven</h2>
+          <p class="lede">Haven mendampingi lewat pesan dan rujukan ke lembaga resmi. Haven tidak menggantikan polisi, rumah sakit, atau hotline yang berjaga sepanjang hari.</p>
         </div>
-        <ul class="article-grid">
-          <li class="stack-sm"><span class="avatar" style="width:64px;height:64px;font-size:1.25rem" aria-hidden="true">A</span><h3 class="h4">Anggota A</h3><p class="muted small">NIM ·  Pelaporan, lacak laporan, autentikasi, keamanan inti</p></li>
-          <li class="stack-sm"><span class="avatar" style="width:64px;height:64px;font-size:1.25rem" aria-hidden="true">B</span><h3 class="h4">Anggota B</h3><p class="muted small">NIM · Manajemen kasus, jadwal, pesan aman, notifikasi</p></li>
-          <li class="stack-sm"><span class="avatar" style="width:64px;height:64px;font-size:1.25rem" aria-hidden="true">C</span><h3 class="h4">Anggota C</h3><p class="muted small">NIM · Edukasi, direktori layanan, statistik, UI</p></li>
-        </ul>
         <div class="alert alert-info" style="margin-top:48px">
           <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
-          <div>Haven adalah proyek kuliah. Belum ada lembaga resmi yang memantau laporan di sini. Dalam keadaan darurat, hubungi <a href="tel:112">112</a> atau SAPA <a href="tel:129">129</a>.</div>
+          <div><?= service_limit_html() ?></div>
         </div>
       </div>
     </section>

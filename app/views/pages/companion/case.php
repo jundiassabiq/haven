@@ -2,12 +2,16 @@
 /**
  * @var array $report  @var string $chronology  @var array $contact  @var array $attachments  @var array $notes
  * @var array $logs  @var array $upcoming  @var array $services  @var ?array $service  @var int $unread  @var array $next
+ * @var ?array $consent
  */
 $code = $report['code'];
 $s = $report['status'];
 $active = in_array($s, CaseWorkflow::ACTIVE, true);
 $errs = form_errors();
 $noteErr = isset($errs['body']);
+// Laporan saksi: korban harus menyetujui tindak lanjut sebelum kasus dirujuk (Req 5.6, 5.8).
+$byWitness = (string) ($report['reporter_type'] ?? 'korban') === ConsentGuard::WITNESS;
+$needConsent = $byWitness && $consent === null;
 ?>
 <a class="back-link" href="<?= e(url('/pendamping/kasus')) ?>"><?= icon('arrow-left') ?> Kasus saya</a>
 <div class="case-head">
@@ -16,6 +20,7 @@ $noteErr = isset($errs['body']);
     <?= status_badge($s) ?>
     <?= urgency_badge($report['urgency'], 'Urgensi ') ?>
     <?php if ((int) $report['in_danger']): ?><span class="badge" data-urgency="tinggi">Menyatakan dalam bahaya</span><?php endif; ?>
+    <?php if ($byWitness): ?><span class="badge">Dilaporkan oleh saksi</span><?php endif; ?>
     <div class="case-meta">
       <span><?= icon('user') ?>Penyintas: <?= $report['user_id'] ? 'berakun' : 'anonim' ?></span>
       <span><?= icon('calendar') ?>Dilaporkan <?= e(id_date($report['created_at'])) ?></span>
@@ -127,6 +132,30 @@ $noteErr = isset($errs['body']);
   </div>
 
   <aside class="stack">
+    <?php if ($byWitness): ?>
+      <section class="panel" id="persetujuan">
+        <div class="panel-head"><h2 class="panel-title">Persetujuan korban</h2></div>
+        <?php if ($consent !== null): ?>
+          <div class="panel-body stack-sm">
+            <p class="small">Tercatat oleh <strong><?= e($consent['companion_name'] ?? 'pendamping yang akunnya sudah dihapus') ?></strong> pada <?= e(id_date($consent['created_at'], true)) ?>.</p>
+            <p class="small muted">Kasus ini sudah bisa dirujuk ke layanan.</p>
+          </div>
+        <?php else: ?>
+          <form method="post" action="<?= e(url('/pendamping/kasus/' . $code . '/persetujuan')) ?>" novalidate data-validate>
+            <?= csrf_field() ?>
+            <div class="panel-body form-stack">
+              <p class="small">Laporan ini dibuat saksi, bukan korban. Hubungi korban lebih dulu. Rujukan ke layanan baru bisa disimpan setelah korban sendiri menyatakan setuju didampingi.</p>
+              <div class="field">
+                <label class="check"><input type="checkbox" name="konfirmasi" value="1" required data-msg="Centang pernyataan bahwa korban sudah setuju didampingi."<?= field_aria('konfirmasi') ?>> <span>Korban sudah saya hubungi dan menyatakan setuju didampingi.</span></label>
+                <?= field_error('konfirmasi') ?>
+              </div>
+            </div>
+            <div class="panel-foot row" style="justify-content:flex-end"><button class="btn btn-ink btn-sm" type="submit">Catat persetujuan</button></div>
+          </form>
+        <?php endif; ?>
+      </section>
+    <?php endif; ?>
+
     <?php if ($next): ?>
       <form class="panel" method="post" action="<?= e(url('/pendamping/kasus/' . $code . '/status')) ?>" novalidate data-validate>
         <?= csrf_field() ?>
@@ -143,6 +172,12 @@ $noteErr = isset($errs['body']);
             <?= field_error('status') ?>
           </fieldset>
           <?php if (in_array('dirujuk', $next, true)): ?>
+            <?php if ($needConsent): ?>
+              <div class="alert alert-warn">
+                <?= icon('alert') ?>
+                <div><strong>Rujukan masih terkunci.</strong>Catat persetujuan korban di panel "Persetujuan korban" dulu. Selama belum tercatat, status "Dirujuk" akan ditolak saat disimpan.</div>
+              </div>
+            <?php endif; ?>
             <div class="field" data-show-when="status=dirujuk">
               <label class="label" for="svc">Layanan rujukan</label>
               <select class="select" id="svc" name="layanan" data-cond-required data-msg="Pilih layanan tujuan rujukan."<?= field_aria('layanan') ?>>
@@ -171,7 +206,19 @@ $noteErr = isset($errs['body']);
     <?php if ($service): ?>
       <section class="panel">
         <div class="panel-head"><h2 class="panel-title">Rujukan</h2></div>
-        <ul class="service-list" style="padding:12px"><?php $s2 = $s; $s = $service; $showContactUnverified = true; include APP_PATH . '/views/partials/service-item.php'; $s = $s2; ?></ul>
+        <ul class="service-list" style="padding:12px"><?php $s2 = $s; $s = $service; include APP_PATH . '/views/partials/service-item.php'; $s = $s2; ?></ul>
+        <?php
+        // Pendamping tetap bisa menelepon rujukan yang belum diverifikasi. Nomor ini
+        // hanya untuk halaman pendamping; tampilan penyintas dan publik memakai
+        // ServiceRules::publicView, jadi di sana nomornya tetap tersembunyi (Req 1.1).
+        $internal = array_values(array_filter([trim((string) ($service['phone'] ?? '')), trim((string) ($service['whatsapp'] ?? ''))]));
+        ?>
+        <?php if (!(int) $service['is_verified'] && $internal): ?>
+          <div class="panel-body">
+            <p class="small muted">Nomor internal, belum diverifikasi tim jadi tidak tampil untuk penyintas:
+              <span class="mono"><?= e(implode(' · ', $internal)) ?></span>. Pastikan nomornya benar sebelum kamu teruskan.</p>
+          </div>
+        <?php endif; ?>
       </section>
     <?php endif; ?>
 

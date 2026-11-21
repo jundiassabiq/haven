@@ -35,6 +35,7 @@ final class CompanionCaseController
             'upcoming' => $upcoming,
             'services' => Database::all('SELECT id, name, is_verified FROM services ORDER BY is_verified DESC, name'),
             'service' => $r['service_id'] ? Service::find((int) $r['service_id']) : null,
+            'consent' => ReportConsent::forReport((int) $r['id']),
             'unread' => Message::unreadFor((int) $r['id'], 'companion'),
             'next' => array_values(array_intersect(CaseWorkflow::allowedNext($r['status']), self::COMPANION_NEXT)),
         ], 'app');
@@ -68,6 +69,33 @@ final class CompanionCaseController
             back_with($back, ['status' => $e->getMessage()], $old);
         }
         Session::flash('success', 'Status diperbarui menjadi ' . Report::STATUS[$to] . '. Penyintas menerima notifikasi.');
+        redirect($back);
+    }
+
+    /**
+     * Mencatat bahwa korban dari laporan saksi setuju didampingi (Req 5.7).
+     * Hanya pendamping yang ditugaskan boleh mencatatnya (`CaseAccess`), token
+     * CSRF diperiksa `App::run` sebelum aksi ini berjalan (Req 10.6), dan
+     * pencatatannya masuk audit dalam request yang sama (Req 10.5).
+     */
+    public function recordConsent(array $p): void
+    {
+        $r = CaseAccess::require($p['code'], 'companion');
+        $back = '/pendamping/kasus/' . $r['code'] . '#persetujuan';
+
+        if ((string) ($r['reporter_type'] ?? 'korban') !== ConsentGuard::WITNESS) {
+            back_with($back, ['konfirmasi' => 'Laporan ini dibuat korban sendiri, jadi tidak ada persetujuan korban yang perlu dicatat.']);
+        }
+        if (!input_bool('konfirmasi')) {
+            back_with($back, ['konfirmasi' => 'Centang pernyataan bahwa korban sudah setuju didampingi.']);
+        }
+        if (!ReportConsent::record((int) $r['id'], (int) Auth::id())) {
+            Session::flash('info', 'Persetujuan korban untuk kasus ini sudah tercatat sebelumnya.');
+            redirect($back);
+        }
+
+        Audit::log('report.consent', 'report', $r['code'], 'Pendamping mencatat persetujuan korban');
+        Session::flash('success', 'Persetujuan korban tercatat. Kasus ini sekarang bisa dirujuk ke layanan.');
         redirect($back);
     }
 

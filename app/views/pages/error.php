@@ -11,7 +11,7 @@ $copy = [
 ];
 [$heading, $body] = $copy[$status] ?? $copy[500];
 ?>
-<main id="main" class="error-page">
+<main id="konten" tabindex="-1" class="error-page">
   <div class="inner">
     <p class="error-code" aria-hidden="true"><?= (int) $status ?></p>
     <h1 class="h2"><?= e($heading) ?></h1>

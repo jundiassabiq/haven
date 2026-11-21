@@ -1,6 +1,6 @@
-<main id="main" class="auth">
+<main id="konten" tabindex="-1" class="auth">
   <div class="auth-media">
-    <div class="media"><img src="<?= asset('img/sunset.jpg') ?>" alt="" width="1200" height="1600"></div>
+    <?php if (!lite()): ?><div class="media"><img src="<?= asset('img/sunset.jpg') ?>" alt="" width="1200" height="1600"></div><?php endif; ?>
     <p class="auth-quote">Laporan anonim yang dulu kamu kirim bisa ditautkan ke akun ini.</p>
   </div>
   <div class="auth-panel">

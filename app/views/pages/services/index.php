@@ -1,5 +1,5 @@
 <?php /** @var array $services  @var array $provinces  @var array $cities  @var array $f */ ?>
-<main id="main">
+<main id="konten" tabindex="-1">
   <section class="page-head">
     <div class="container">
       <h1 class="h2">Lembaga yang menangani kekerasan seksual</h1>

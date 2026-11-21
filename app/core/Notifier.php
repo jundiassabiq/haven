@@ -7,7 +7,7 @@ declare(strict_types=1);
  */
 final class Notifier
 {
-    public const TYPES = ['status' => 'Status', 'pesan' => 'Pesan', 'jadwal' => 'Jadwal', 'tugas' => 'Penugasan', 'rujukan' => 'Rujukan', 'laporan' => 'Laporan baru'];
+    public const TYPES = ['status' => 'Status', 'pesan' => 'Pesan', 'jadwal' => 'Jadwal', 'tugas' => 'Penugasan', 'rujukan' => 'Rujukan', 'laporan' => 'Laporan baru', 'pengingat' => 'Pengingat'];
 
     public static function send(?int $userId, ?int $reportId, string $type, string $title, string $link): void
     {

@@ -45,14 +45,30 @@ final class User
         ]);
     }
 
-    public static function create(string $name, string $email, string $password, string $role, ?string $region = null): int
+    /**
+     * Creates a staff or survivor account.
+     *
+     * `$childTrained` menandai pendamping terlatih kasus anak (Req 4.9). Hanya
+     * pendamping yang bisa ditandai: peran lain selalu tersimpan 0, jadi
+     * `Assignment::candidates` tidak pernah menawarkan admin pada kasus anak.
+     */
+    public static function create(string $name, string $email, string $password, string $role, ?string $region = null, bool $childTrained = false): int
     {
         if (!in_array($role, Auth::ROLES, true)) {
             throw new InvalidArgumentException('Peran tidak valid');
         }
         return Database::insert(
-            'INSERT INTO users (name, email, password_hash, role, region, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [trim($name), self::normalizeEmail($email), password_hash($password, PASSWORD_DEFAULT), $role, $region, now(), now()]
+            'INSERT INTO users (name, email, password_hash, role, region, child_trained, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [trim($name), self::normalizeEmail($email), password_hash($password, PASSWORD_DEFAULT), $role, $region, (int) ($childTrained && $role === 'companion'), now(), now()]
+        );
+    }
+
+    /** Penanda pendamping terlatih kasus anak, dipakai Admin > Pengguna (Req 4.9). */
+    public static function setChildTrained(int $id, bool $trained): void
+    {
+        Database::run(
+            "UPDATE users SET child_trained = ?, updated_at = ? WHERE id = ? AND role = 'companion'",
+            [(int) $trained, now(), $id]
         );
     }
 
@@ -105,7 +121,7 @@ final class User
     /** Staff list for admin (survivors are counted, never listed). */
     public static function staff(): array
     {
-        return Database::all("SELECT id, name, email, role, region, is_active, last_login_at FROM users WHERE role IN ('companion','admin') ORDER BY role DESC, is_active DESC, name");
+        return Database::all("SELECT id, name, email, role, region, child_trained, is_active, last_login_at FROM users WHERE role IN ('companion','admin') ORDER BY role DESC, is_active DESC, name");
     }
 
     public static function survivorCount(): int

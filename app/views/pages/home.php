@@ -1,8 +1,16 @@
-<?php /** @var array $numbers  @var array $articles */ ?>
-<main id="main">
+<?php
+/**
+ * Beranda. Mode ringan melewatkan gambar sampul: latar gelap `.hero-media` tetap
+ * ada, jadi teks hero tetap terbaca tanpa mengunduh fotonya (Req 8.8).
+ *
+ * @var array $numbers  @var array $articles
+ */
+$lite = lite();
+?>
+<main id="konten" tabindex="-1">
     <!-- HERO -->
     <section class="hero" aria-labelledby="hero-title">
-      <div class="media hero-media"><img src="<?= asset('img/support-circle.jpg') ?>" alt="" width="2400" height="1600" fetchpriority="high"></div>
+      <div class="media hero-media"><?php if (!$lite): ?><img src="<?= asset('img/support-circle.jpg') ?>" alt="" width="2400" height="1600" fetchpriority="high"><?php endif; ?></div>
       <div class="hero-shade" aria-hidden="true"></div>
       <div class="container hero-inner">
         <div class="hero-copy">
@@ -16,7 +24,7 @@
 
         <aside class="help-card" aria-labelledby="help-title">
           <h2 id="help-title">Butuh bantuan sekarang?</h2>
-          <p>Laporan di Haven tidak dipantau 24 jam. Jika kamu terancam sekarang, telepon salah satu nomor ini.</p>
+          <p><?= service_limit_html() ?></p>
           <div class="hotlines">
             <a class="hotline" href="tel:112">
               <span class="hotline-name">Darurat nasional</span>
@@ -99,7 +107,7 @@
         </div>
 
         <figure class="proof-card" aria-label="Contoh laporan seperti yang tersimpan di database">
-          <div class="media proof-media"><img src="<?= asset('img/holding-hands.jpg') ?>" alt="" width="1000" height="1500" loading="lazy"></div>
+          <?php if (!$lite): ?><div class="media proof-media"><img src="<?= asset('img/holding-hands.jpg') ?>" alt="" width="1000" height="1500" loading="lazy"></div><?php endif; ?>
           <figcaption class="mock-report">
             <div class="row-between">
               <span class="case-code" style="font-size:1.125rem">HV-7Q4K2M</span>
@@ -108,7 +116,7 @@
             <dl class="kv">
               <div><dt>Jenis</dt><dd>Pelecehan nonfisik</dd></div>
               <div><dt>Wilayah</dt><dd>Banyumas</dd></div>
-              <div class="full"><dt>Kronologi (yang tersimpan)</dt><dd class="cipher">q8Jf2Lr+0bW1kT9xVn3aE7m4ZcP0yH6s/uD2gQe5RkA=… </dd></div>
+              <div class="full"><dt>Kronologi (yang tersimpan)</dt><dd class="cipher">q8Jf2Lr+0bW1kT9xVn3aE7m4ZcP0yH6s/uD2gQe5RkA=â€¦ </dd></div>
             </dl>
           </figcaption>
         </figure>
@@ -130,7 +138,7 @@
             <button role="tab" id="t-digital" aria-controls="p-digital" aria-selected="false" tabindex="-1">Keamanan digital</button>
           </div>
           <div class="tab-panel" role="tabpanel" id="p-kenali" aria-labelledby="t-kenali" style="background:var(--cream)">
-            <div class="media tab-media"><img src="<?= asset('img/reaching-hands.jpg') ?>" alt="Dua tangan saling meraih" width="1600" height="1067" loading="lazy"></div>
+            <?php if (!$lite): ?><div class="media tab-media"><img src="<?= asset('img/reaching-hands.jpg') ?>" alt="Dua tangan saling meraih" width="1600" height="1067" loading="lazy"></div><?php endif; ?>
             <div class="tab-copy">
               <h3 class="h3">Komentar dan pesan juga bisa dilaporkan.</h3>
               <p>Pelecehan nonfisik, seperti siulan, isyarat, atau lelucon seksual yang terus diulang setelah diminta berhenti, adalah salah satu dari sembilan bentuk dalam UU TPKS.</p>
@@ -138,7 +146,7 @@
             </div>
           </div>
           <div class="tab-panel" role="tabpanel" id="p-hak" aria-labelledby="t-hak" hidden style="background:var(--cream)">
-            <div class="media tab-media"><img src="<?= asset('img/counseling.jpg') ?>" alt="Seorang perempuan berbicara dengan konselor" width="1600" height="1067" loading="lazy"></div>
+            <?php if (!$lite): ?><div class="media tab-media"><img src="<?= asset('img/counseling.jpg') ?>" alt="Seorang perempuan berbicara dengan konselor" width="1600" height="1067" loading="lazy"></div><?php endif; ?>
             <div class="tab-copy">
               <h3 class="h3">Kamu boleh minta layanan tanpa melapor ke polisi.</h3>
               <p>Pemeriksaan kesehatan, konseling, dan pendampingan hukum adalah hak korban menurut UU TPKS. Laporan ke polisi tidak menjadi syaratnya.</p>
@@ -146,7 +154,7 @@
             </div>
           </div>
           <div class="tab-panel" role="tabpanel" id="p-teman" aria-labelledby="t-teman" hidden style="background:var(--cream)">
-            <div class="media tab-media"><img src="<?= asset('img/holding-hands.jpg') ?>" alt="Dua orang saling menggenggam tangan" width="1000" height="1500" loading="lazy"></div>
+            <?php if (!$lite): ?><div class="media tab-media"><img src="<?= asset('img/holding-hands.jpg') ?>" alt="Dua orang saling menggenggam tangan" width="1000" height="1500" loading="lazy"></div><?php endif; ?>
             <div class="tab-copy">
               <h3 class="h3">Temanmu bercerita? Jangan tanya kenapa ia tidak melawan.</h3>
               <p>Pertanyaan seperti itu terdengar menyalahkan. Artikel ini berisi kalimat yang sebaiknya kamu ucapkan dan yang sebaiknya kamu hindari.</p>
@@ -154,7 +162,7 @@
             </div>
           </div>
           <div class="tab-panel" role="tabpanel" id="p-digital" aria-labelledby="t-digital" hidden style="background:var(--cream)">
-            <div class="media tab-media"><img src="<?= asset('img/phone.jpg') ?>" alt="Seorang perempuan berhijab memegang ponsel" width="1600" height="1067" loading="lazy"></div>
+            <?php if (!$lite): ?><div class="media tab-media"><img src="<?= asset('img/phone.jpg') ?>" alt="Seorang perempuan berhijab memegang ponsel" width="1600" height="1067" loading="lazy"></div><?php endif; ?>
             <div class="tab-copy">
               <h3 class="h3">Diancam fotomu akan disebar?</h3>
               <p>Jangan turuti permintaannya. Ambil tangkapan layar yang memperlihatkan nama akun dan tanggal, lalu laporkan. Ancaman seperti ini termasuk kekerasan seksual berbasis elektronik.</p>
@@ -203,9 +211,11 @@
           <p class="lede" style="margin-top:18px">UPTD PPA, rumah sakit, lembaga bantuan hukum, dan unit PPA kepolisian. Nomor telepon hanya ditampilkan setelah tim mengeceknya ke lembaga tersebut.</p>
           <a class="btn btn-ink" href="<?= e(url('/layanan')) ?>" style="margin-top:32px">Cari layanan di wilayahmu</a>
         </div>
-        <div data-directory="public" data-limit="3" data-endpoint="<?= e(url('/api/layanan')) ?>">
-          <ul class="service-list" data-directory-list></ul>
-        </div>
+        <?php if (!$lite): ?>
+          <div data-directory="public" data-limit="3" data-endpoint="<?= e(url('/api/layanan')) ?>">
+            <ul class="service-list" data-directory-list></ul>
+          </div>
+        <?php endif; ?>
       </div>
     </section>
 

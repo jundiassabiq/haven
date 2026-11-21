@@ -57,8 +57,46 @@ final class CaseWorkflow
     }
 
     /**
+     * Pure gate on who may receive a case, given the candidates offered.
+     *
+     * Dipakai dua kali: `AdminCaseController::assign` memakainya untuk menaruh
+     * galat di kolom pendamping sebelum transaksi dibuka, dan `transition`
+     * memakainya lagi pada kasus anak supaya penugasan tidak bisa lewat jalur
+     * lain.
+     *
+     * Pendamping di luar daftar kandidat ditolak (Req 4.9: pada kasus anak
+     * hanya pendamping terlatih di wilayah laporan yang ditawarkan). Pada jalur
+     * peringatan Req 4.10 daftar berisi semua pendamping, tetapi penugasannya
+     * baru selesai setelah Admin mengirim `confirm=1`.
+     *
+     * @param array{list?:list<array<string,mixed>>, needsConfirm?:bool, message?:?string} $candidates hasil `Assignment::candidates`
+     * @return string|null pesan galat untuk Admin
+     */
+    public static function assignmentError(array $candidates, int $companionId, bool $confirmed): ?string
+    {
+        $ids = array_map(static fn (array $c): int => (int) ($c['id'] ?? 0), $candidates['list'] ?? []);
+        if ($companionId <= 0 || !in_array($companionId, $ids, true)) {
+            return 'Pendamping itu tidak ada dalam daftar untuk kasus ini. Muat ulang halaman lalu pilih dari daftar.';
+        }
+        if (!empty($candidates['needsConfirm']) && !$confirmed) {
+            return $candidates['message'] ?? Assignment::WARNING;
+        }
+        return null;
+    }
+
+    /**
      * Applies one transition: updates the report, writes the status log, audits, and notifies.
-     * @param array{companion_id?:int|null, service_id?:int|null, reason?:string|null, note?:string|null} $ctx
+     *
+     * Laporan saksi tidak bisa menjadi `dirujuk` sebelum persetujuan korban
+     * tercatat. Pemeriksaannya lewat `ConsentGuard` dan terjadi sebelum satu
+     * pun kolom status ditulis, apa pun status kasus saat ini (Req 5.8).
+     *
+     * Kasus anak hanya bisa ditugaskan ke kandidat dari `Assignment::candidates`,
+     * dan pada jalur peringatan Req 4.10 hanya dengan `confirm = true` di
+     * `$ctx`. Kandidat dihitung di sini bila pemanggil tidak mengirimnya, jadi
+     * pagar itu berlaku untuk setiap jalur penugasan (Req 4.9, 4.10).
+     *
+     * @param array{companion_id?:int|null, service_id?:int|null, reason?:string|null, note?:string|null, candidates?:array, confirm?:bool} $ctx
      * @throws DomainException with a user-facing message
      */
     public static function transition(array $report, string $to, array $ctx = []): array
@@ -67,6 +105,26 @@ final class CaseWorkflow
         $err = self::check($from, $to, $ctx);
         if ($err !== null) {
             throw new DomainException($err);
+        }
+
+        if ($to === 'didampingi' && !empty($report['is_child'])) {
+            $candidates = $ctx['candidates'] ?? Assignment::candidates(
+                Report::companionsByLoad($report['city'] ?? null),
+                $report
+            );
+            $assignError = self::assignmentError($candidates, (int) $ctx['companion_id'], !empty($ctx['confirm']));
+            if ($assignError !== null) {
+                throw new DomainException($assignError);
+            }
+        }
+
+        $consentError = ConsentGuard::check(
+            (string) ($report['reporter_type'] ?? 'korban'),
+            ReportConsent::exists((int) $report['id']),
+            $to
+        );
+        if ($consentError !== null) {
+            throw new DomainException($consentError);
         }
 
         $pdo = Database::pdo();

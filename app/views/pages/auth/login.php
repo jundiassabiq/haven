@@ -1,7 +1,7 @@
 <?php /** @var string|null $formError */ ?>
-<main id="main" class="auth">
+<main id="konten" tabindex="-1" class="auth">
   <div class="auth-media">
-    <div class="media"><img src="<?= asset('img/holding-hands.jpg') ?>" alt="" width="1000" height="1500"></div>
+    <?php if (!lite()): ?><div class="media"><img src="<?= asset('img/holding-hands.jpg') ?>" alt="" width="1000" height="1500"></div><?php endif; ?>
     <p class="auth-quote">Pesan dari pendampingmu menunggu di dalam.</p>
   </div>
   <div class="auth-panel">
