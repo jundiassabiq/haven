@@ -2,13 +2,18 @@
 storage/logs/*
 storage/uploads/*
 storage/mail.log
+storage/cache/
 !storage/logs/.gitkeep
 !storage/uploads/.gitkeep
 !storage/.htaccess
 public/uploads/covers/
 
+# Dependensi pengembangan (Composer). Hanya untuk tes; aplikasi tidak memakainya.
+vendor/
+composer.phar
+.phpunit.cache/
+
 # Bahan pendukung, tidak ikut repo
 prototype/
 gambar/
 docs/
-tests/
