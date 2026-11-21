@@ -17,3 +17,6 @@ composer.phar
 prototype/
 gambar/
 docs/
+
+# Status eksekusi tugas Kiro. Milik tiap mesin, supaya tidak bentrok antar anggota tim.
+.kiro/specs/*/tasks.meta.json
