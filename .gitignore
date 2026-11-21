@@ -6,3 +6,9 @@ storage/mail.log
 !storage/uploads/.gitkeep
 !storage/.htaccess
 public/uploads/covers/
+
+# Bahan pendukung, tidak ikut repo
+prototype/
+gambar/
+docs/
+tests/
