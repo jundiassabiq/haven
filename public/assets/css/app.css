@@ -306,13 +306,15 @@ legend.label { padding: 0; margin-bottom: 8px; }
 .search .input { padding-left: 44px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
+  display: inline-flex; align-items: center; justify-content: center;
   height: 40px; padding: 0 16px;
-  border: 1.5px solid var(--ink); border-radius: 999px; background: transparent;
+  border: 1.5px solid var(--line); border-radius: 999px; background: var(--paper);
   font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-  transition: background-color 0.15s, color 0.15s;
+  text-decoration: none; color: var(--ink-2);
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
 }
-.chip:hover { background: var(--yellow-soft); }
-.chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.chip:hover { background: var(--cream); border-color: var(--ink-3); color: var(--ink); }
+.chip[aria-pressed="true"], .chip[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--paper); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .result-count { font-family: var(--font-mono); font-size: 0.875rem; color: var(--ink-3); }
 
 /* ---------- Pagination ---------- */
@@ -712,7 +714,7 @@ dialog.modal[open] { animation: modal-in 0.35s var(--ease-out); }
 .service-meta { grid-column: 1; display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 0.9375rem; color: var(--ink-2); }
 .service-meta span { display: inline-flex; align-items: center; gap: 7px; }
 .service-meta .icon { width: 16px; height: 16px; color: var(--ink-3); flex: none; }
-.service-actions { grid-column: 2; grid-row: 1 / span 3; display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.service-actions { grid-column: 2; display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
 .service-tags { grid-column: 1; display: flex; flex-wrap: wrap; gap: 6px; }
 @media (max-width: 680px) { .service { grid-template-columns: 1fr; } .service-actions { grid-column: 1; grid-row: auto; flex-direction: row; flex-wrap: wrap; } }
 

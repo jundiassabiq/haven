@@ -21,7 +21,7 @@
           </div>
           <div class="service-actions">
             <?php if ($ref['contact'] === null): ?>
-              <span class="small muted">Nomornya kami sembunyikan sampai tim menelepon lembaga ini. Untuk sekarang hubungi SAPA 129 atau 112.</span>
+              <span class="small muted">Nomor belum tersedia. Hubungi SAPA 129 atau 112.</span>
             <?php elseif ($ref['contact_kind'] === 'phone'): ?>
               <a class="btn btn-ink btn-xs" href="tel:<?= e(preg_replace('/[^0-9+]/', '', $ref['contact'])) ?>"><?= icon('phone') ?> Telepon <span class="mono"><?= e($ref['contact']) ?></span></a>
             <?php else: ?>

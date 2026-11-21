@@ -439,7 +439,7 @@
       <div class="service-actions">
         ${s.phone ? `<a class="btn btn-ink btn-xs" href="tel:${esc(s.phone.replace(/[^0-9+]/g, ""))}">${icon("phone")} Telepon <span class="mono">${esc(s.phone)}</span></a>` : ""}
         ${s.whatsapp ? `<a class="btn btn-ghost btn-xs" href="https://wa.me/${esc(s.whatsapp.replace(/[^0-9]/g, "").replace(/^0/, "62"))}" rel="noopener noreferrer">${icon("message")} <span class="mono">${esc(s.whatsapp)}</span></a>` : ""}
-        ${s.contact_label ? `<span class="small muted"><strong>${esc(s.contact_label)}</strong> · nomornya kami sembunyikan sampai tim menelepon lembaga ini</span>` : s.verified_at ? `<span class="small muted">Nomor dicek ${esc(s.verified_at)}</span>` : ""}
+        ${s.contact_label ? `<span class="small muted"><strong>${esc(s.contact_label)}</strong> · nomor belum tersedia</span>` : s.verified_at ? `<span class="small muted">Nomor dicek ${esc(s.verified_at)}</span>` : ""}
       </div>
     </li>`;
   $$("[data-directory]").forEach((root) => {
