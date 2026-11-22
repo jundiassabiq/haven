@@ -18,6 +18,8 @@ final class CaseController
         $data = [
             'title' => 'Laporan ' . $report['code'] . ' | Haven',
             'active' => $accountView ? 'laporan' : 'lacak',
+            // Halaman kasus memakai tombol keluar cepat berlabel (Req 8.17).
+            'quickExit' => 'labeled',
             'report' => $report,
             'logs' => Report::statusLogs((int) $report['id']),
             'companion' => $companion,
@@ -27,6 +29,10 @@ final class CaseController
             'past' => $past,
             'slots' => $active && $companion ? Slot::availableFor((int) $companion['id']) : [],
             'service' => $report['service_id'] ? Service::find((int) $report['service_id']) : null,
+            // Req 4.4, 4.5: halaman laporan kasus anak selalu memuat panel rujukan anak.
+            'childPanel' => !empty($report['is_child']) ? ChildReferral::panel(Service::findChildServices()) : null,
+            // Req 6.2: batas waktu balasan yang berlaku untuk kasus ini, dalam jam.
+            'slaHours' => sla_hours((bool) (int) $report['in_danger']),
             'unread' => Message::unreadFor((int) $report['id'], 'survivor'),
             'accountView' => $accountView,
         ];

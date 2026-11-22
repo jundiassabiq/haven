@@ -5,8 +5,11 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const icon = (n) => `<svg class="icon" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+  /* Lite mode (Req 8.8): the server marks the page, and we drop every repeating
+     request. What is left runs once, on demand, after the user asks for it. */
+  const LITE = document.body.hasAttribute("data-lite");
 
-  /* ---------- Quick exit: button or Esc twice ---------- */
+  /* ---------- Quick exit: link, button, or Esc twice ---------- */
   const NEUTRAL = "https://www.google.com/search?q=prakiraan+cuaca+hari+ini";
   function quickExit() {
     try { sessionStorage.clear(); } catch (e) {}
@@ -20,7 +23,13 @@
     if (t - lastEsc < 600) quickExit();
     lastEsc = t;
   });
-  document.addEventListener("click", (e) => { if (e.target.closest("[data-quick-exit]")) quickExit(); });
+  /* The control is a link so it still works without JS. With JS we replace the
+     current entry instead of navigating, so Back does not return to Haven. */
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("[data-quick-exit]")) return;
+    e.preventDefault();
+    quickExit();
+  });
   window.HavenCsrf = () => document.querySelector('meta[name="csrf-token"]')?.content || "";
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -71,7 +80,9 @@
   if (toggle && mobileNav) {
     const set = (open) => {
       toggle.setAttribute("aria-expanded", String(open));
-      toggle.querySelector(".sr-only").textContent = open ? "Tutup menu" : "Buka menu";
+      toggle.querySelector(".sr-only").textContent = open
+        ? toggle.dataset.labelClose || "Tutup menu"
+        : toggle.dataset.labelOpen || "Buka menu";
       mobileNav.hidden = !open;
       document.body.style.overflow = open ? "hidden" : "";
     };
@@ -426,8 +437,9 @@
       </div>
       <div class="service-tags">${s.tags.map((x) => `<span class="badge badge-plain">${esc(x)}</span>`).join("")}</div>
       <div class="service-actions">
-        ${s.phone ? `<a class="btn btn-ink btn-xs" href="tel:${esc(s.phone.replace(/[^0-9+]/g, ""))}">${icon("phone")} Telepon <span class="mono">${esc(s.phone)}</span></a>` : '<span class="small muted">Nomor belum dicek tim</span>'}
+        ${s.phone ? `<a class="btn btn-ink btn-xs" href="tel:${esc(s.phone.replace(/[^0-9+]/g, ""))}">${icon("phone")} Telepon <span class="mono">${esc(s.phone)}</span></a>` : ""}
         ${s.whatsapp ? `<a class="btn btn-ghost btn-xs" href="https://wa.me/${esc(s.whatsapp.replace(/[^0-9]/g, "").replace(/^0/, "62"))}" rel="noopener noreferrer">${icon("message")} <span class="mono">${esc(s.whatsapp)}</span></a>` : ""}
+        ${s.contact_label ? `<span class="small muted"><strong>${esc(s.contact_label)}</strong> · nomor belum tersedia</span>` : s.verified_at ? `<span class="small muted">Nomor dicek ${esc(s.verified_at)}</span>` : ""}
       </div>
     </li>`;
   $$("[data-directory]").forEach((root) => {
@@ -520,8 +532,22 @@
       }
     };
     poll();
-    setInterval(() => { if (document.hidden) syncText("Dijeda"); else poll(); }, 5000);
-    document.addEventListener("visibilitychange", () => { if (!document.hidden) poll(); });
+    if (LITE) {
+      /* No interval in lite mode (Req 8.8). The survivor pulls new messages when
+         they want them, so the page makes one request per tap instead of one
+         every five seconds. */
+      if (sync) {
+        const refresh = document.createElement("button");
+        refresh.type = "button";
+        refresh.className = "btn btn-ghost btn-xs";
+        refresh.textContent = "Muat pesan baru";
+        refresh.addEventListener("click", () => poll());
+        sync.insertAdjacentElement("afterend", refresh);
+      }
+    } else {
+      setInterval(() => { if (document.hidden) syncText("Dijeda"); else poll(); }, 5000);
+      document.addEventListener("visibilitychange", () => { if (!document.hidden) poll(); });
+    }
 
     if (!form) return;
     const grow = () => { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 160) + "px"; };
@@ -600,7 +626,8 @@
       } catch (e) { /* keep the last state; next poll retries */ }
     };
     load();
-    setInterval(() => { if (!document.hidden) load(); }, 30000);
+    // Lite mode counts the badge once per page load, with no refresh loop (Req 8.8).
+    if (!LITE) setInterval(() => { if (!document.hidden) load(); }, 30000);
     $$("[data-mark-read]").forEach((b) => b.addEventListener("click", async () => {
       await fetch(b.dataset.endpoint, { method: "POST", headers: { "X-CSRF-Token": window.HavenCsrf(), "X-Requested-With": "fetch", Accept: "application/json" } });
       await load();

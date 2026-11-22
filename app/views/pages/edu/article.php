@@ -1,5 +1,5 @@
 <?php /** @var array $a  @var string $html  @var array $sources  @var array $related  @var bool|null $preview */ ?>
-<main id="main">
+<main id="konten" tabindex="-1">
   <article>
     <header class="container article-head">
       <?php if (!empty($preview)): ?>
@@ -14,7 +14,7 @@
         <span class="mono">Diperbarui <?= e(mb_strtoupper(id_date($a['updated_at']))) ?></span>
         <span>Ditulis tim Haven</span>
       </p>
-      <div class="media article-cover"><img src="<?= e(Article::coverUrl($a['cover_path'])) ?>" alt="<?= e($a['cover_alt']) ?>" width="1600" height="1067"></div>
+      <?php if (!lite()): ?><div class="media article-cover"><img src="<?= e(Article::coverUrl($a['cover_path'])) ?>" alt="<?= e($a['cover_alt']) ?>" width="1600" height="1067"></div><?php endif; ?>
     </header>
 
     <div class="container article-layout">

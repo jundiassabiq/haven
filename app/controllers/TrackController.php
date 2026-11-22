@@ -9,7 +9,13 @@ final class TrackController
 
     public function form(): void
     {
-        View::show('pages/track/form', ['title' => 'Lacak laporan | Haven', 'active' => 'lacak', 'formError' => Session::getFlash('form_error')]);
+        View::show('pages/track/form', [
+            'title' => 'Lacak laporan | Haven',
+            'active' => 'lacak',
+            // Halaman lacak memakai tombol keluar cepat berlabel (Req 8.17).
+            'quickExit' => 'labeled',
+            'formError' => Session::getFlash('form_error'),
+        ]);
     }
 
     /**

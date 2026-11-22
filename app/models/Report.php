@@ -4,6 +4,7 @@ declare(strict_types=1);
 /** Modules 2 to 4: reports. chronology_enc and contact_enc are always encrypted. */
 final class Report
 {
+    /** Keys and their order match the enum reports.category in database/schema.sql exactly. */
     public const CATEGORIES = [
         'nonfisik' => 'Pelecehan nonfisik',
         'fisik' => 'Pelecehan fisik',
@@ -11,6 +12,12 @@ final class Report
         'pemaksaan' => 'Pemaksaan',
         'eksploitasi' => 'Eksploitasi seksual',
         'belum-yakin' => 'Belum yakin',
+        'kdrt' => 'Kekerasan dalam rumah tangga',
+        'kekerasan-pacaran' => 'Kekerasan dalam pacaran',
+        'psikis' => 'Kekerasan psikis',
+        'ekonomi' => 'Kekerasan ekonomi',
+        'perkawinan-anak' => 'Perkawinan anak',
+        'perdagangan-orang' => 'Perdagangan orang',
     ];
     public const CATEGORY_DESC = [
         'nonfisik' => 'Komentar, siulan, isyarat, atau pesan bernuansa seksual',
@@ -19,6 +26,12 @@ final class Report
         'pemaksaan' => 'Dipaksa melakukan aktivitas seksual, menikah, atau memakai kontrasepsi',
         'eksploitasi' => 'Dimanfaatkan secara seksual demi keuntungan orang lain',
         'belum-yakin' => 'Tidak ada pilihan yang cocok, atau kamu ragu',
+        'kdrt' => 'Kekerasan oleh pasangan atau anggota keluarga di dalam rumah',
+        'kekerasan-pacaran' => 'Kekerasan, pemaksaan, atau kontrol berlebih dari pacar atau mantan pacar',
+        'psikis' => 'Ancaman, penghinaan, atau tekanan yang melukai perasaan dan rasa amanmu',
+        'ekonomi' => 'Penghasilan atau hartamu dikuasai, ditahan, atau dipakai tanpa izin',
+        'perkawinan-anak' => 'Anak di bawah 18 tahun dipaksa atau dinikahkan',
+        'perdagangan-orang' => 'Direkrut, dipindahkan, atau ditahan untuk dieksploitasi',
     ];
     public const STATUS = [
         'diterima' => 'Diterima', 'ditinjau' => 'Ditinjau', 'didampingi' => 'Didampingi',
@@ -46,8 +59,34 @@ final class Report
     /** Steps shown on the survivor timeline (ditutup replaces the tail when it happens). */
     public const TIMELINE = ['diterima', 'ditinjau', 'didampingi', 'dirujuk', 'selesai'];
 
+    /** Batas panjang kontak korban yang ditulis saksi (Req 5.9). */
+    public const VICTIM_CONTACT_MAX = 255;
+
+    /**
+     * Pilihan filter kasus anak di antrean admin (Req 4.8). Kunci adalah nilai
+     * `?anak=` yang diterima; nilai lain diabaikan dan antrean tidak disaring.
+     */
+    public const CHILD_FILTER = ['1' => 'Kasus anak', '0' => 'Bukan kasus anak'];
+
+    /**
+     * All categories for pickers and filters, with the catch-all "Belum yakin" last.
+     * CATEGORIES itself keeps the enum order, so this only changes what the reader sees.
+     * @return array<string,string> slug => label
+     */
+    public static function categoryChoices(): array
+    {
+        $out = self::CATEGORIES;
+        $fallback = $out['belum-yakin'];
+        unset($out['belum-yakin']);
+        return $out + ['belum-yakin' => $fallback];
+    }
+
     /**
      * Server-side validation of the 4-step form.
+     *
+     * Pilihan wajib di awal form (jenis, usia korban, peran pelapor) diperiksa
+     * `ReportIntake::intakeErrors`; pemanggil menggabungkan kedua daftar.
+     *
      * @return array<string,string> field => message
      */
     public static function validationErrors(array $in, bool $accountAllowed): array
@@ -65,14 +104,17 @@ final class Report
             'identitas' => 'required|in:anonim,akun',
             'email' => 'email',
             'wa' => ['regex:/^[0-9+\- ]{9,16}$/'],
+            'kontak_korban' => 'max:' . self::VICTIM_CONTACT_MAX,
             'setuju' => 'accepted',
         ], [
             'jenis.required' => 'Pilih jenis kejadian, atau pilih "Belum yakin".',
+            'jenis.in' => 'Jenis kejadian itu tidak ada dalam daftar. Pilih salah satu pilihan di atas.',
             'bahaya.required' => 'Pilih salah satu.',
             'kronologi.required' => 'Ceritakan sedikit tentang kejadiannya, minimal satu atau dua kalimat.',
             'kronologi.min' => 'Tulis minimal 30 karakter agar pendamping bisa memahami kejadiannya.',
             'berlangsung.required' => 'Pilih salah satu.',
             'wa' => 'Tulis nomor 9 sampai 16 digit, contoh 0812-3456-7890.',
+            'kontak_korban' => 'Tulis kontak korban paling banyak ' . self::VICTIM_CONTACT_MAX . ' karakter, atau kosongkan.',
             'setuju.accepted' => 'Centang ini agar kami bisa memproses laporanmu.',
         ]);
         if (!isset($errors['tanggal']) && ($in['tanggal'] ?? '') !== '' && $in['tanggal'] > date('Y-m-d')) {
@@ -97,8 +139,16 @@ final class Report
 
     /**
      * Creates the report, its first status log, and attachments in one transaction.
+     *
+     * Peran pelapor, jawaban usia, dan status kasus anak ikut tersimpan. Nilai
+     * `is_child` dan urgensi datang dari `ReportIntake::derive` supaya form,
+     * seed, dan antrean memakai aturan yang sama (Req 2.9, 2.10, 4.3, 4.7).
+     * Kontak korban dari saksi disimpan terenkripsi, tidak pernah plaintext
+     * (Req 5.9). Laporan anonim tetap tanpa user id, email, atau IP di kolom
+     * baru (Req 10.4).
+     *
      * @param array $in validated input  @param array $files list of ['tmp_name', 'size', 'mime']
-     * @return array{id:int, code:string, pin:string}
+     * @return array{id:int, code:string, pin:string, reporter_type:string, is_child:bool}
      */
     public static function create(array $in, ?int $userId, array $files): array
     {
@@ -108,19 +158,29 @@ final class Report
         $contact = array_filter(['email' => !empty($in['kontak_email']) ? trim($in['email']) : null, 'wa' => !empty($in['kontak_wa']) ? trim($in['wa']) : null]);
         $inDanger = $in['bahaya'] === 'ya';
 
+        $intake = ReportIntake::derive($in);
+        $reporterType = self::choice($in['peran'] ?? null, ReportIntake::REPORTER, 'korban');
+        $ageAnswer = self::choice($in['usia'] ?? null, ReportIntake::AGE, '');
+        // Hanya saksi yang menitipkan kontak korban (Req 5.9).
+        $victimContact = $reporterType === 'saksi'
+            ? mb_substr(trim((string) ($in['kontak_korban'] ?? '')), 0, self::VICTIM_CONTACT_MAX)
+            : '';
+
         $pdo = Database::pdo();
         $stored = [];
         $pdo->beginTransaction();
         try {
             $id = Database::insert(
                 'INSERT INTO reports (code, pin_hash, user_id, category, in_danger, ongoing, urgency, status, province, city, place_type, perpetrator_relation,
-                    incident_date, chronology_enc, contact_channels, contact_enc, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, \'diterima\', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    incident_date, chronology_enc, contact_channels, contact_enc, reporter_type, victim_age_answer, is_child, victim_contact_enc, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, \'diterima\', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [
                     $code, password_hash($pin, PASSWORD_DEFAULT), $userId, $in['jenis'], (int) $inDanger, $in['berlangsung'],
-                    self::initialUrgency($inDanger, $in['berlangsung']),
+                    $intake['urgency'],
                     $in['provinsi'] ?: null, $in['kota'] ?: null, $in['tempat'] ?: null, $in['pelaku'] ?: null, $in['tanggal'] ?: null,
                     Crypto::enc(trim($in['kronologi'])), implode(',', $channels), $contact ? Crypto::enc(json_encode($contact)) : null,
+                    $reporterType, $ageAnswer !== '' ? $ageAnswer : null, (int) $intake['is_child'],
+                    $victimContact !== '' ? Crypto::enc($victimContact) : null,
                     now(), now(),
                 ]
             );
@@ -141,7 +201,20 @@ final class Report
             }
             throw $e;
         }
-        return ['id' => $id, 'code' => $code, 'pin' => $pin];
+        return ['id' => $id, 'code' => $code, 'pin' => $pin, 'reporter_type' => $reporterType, 'is_child' => $intake['is_child']];
+    }
+
+    /**
+     * Nilai `$raw` bila termasuk `$allowed`, selain itu `$fallback`. Masukan
+     * yang sudah lolos validasi selalu cocok; ini pagar untuk pemanggil lain
+     * seperti `bin/seed-demo.php` yang tidak mengirim pilihan baru.
+     *
+     * @param list<string> $allowed
+     */
+    private static function choice(mixed $raw, array $allowed, string $fallback): string
+    {
+        $value = is_string($raw) ? trim($raw) : '';
+        return in_array($value, $allowed, true) ? $value : $fallback;
     }
 
     public static function codeExists(string $code): bool
@@ -157,6 +230,18 @@ final class Report
     public static function findByCode(string $code): ?array
     {
         return Database::one('SELECT * FROM reports WHERE code = ?', [$code]);
+    }
+
+    /**
+     * Req 10.1 (pertahanan berlapis): buang kolom terenkripsi dari baris
+     * laporan sebelum diteruskan ke lapisan tampilan yang tidak berhak
+     * membacanya, misalnya halaman admin. Admin tidak punya jalur dekripsi,
+     * tetapi ciphertext pun tidak perlu sampai ke view.
+     */
+    public static function withoutCiphertext(array $r): array
+    {
+        unset($r['chronology_enc'], $r['contact_enc'], $r['victim_contact_enc']);
+        return $r;
     }
 
     public static function forUser(int $userId): array
@@ -241,6 +326,11 @@ final class Report
             $w[] = 'r.category = ?';
             $p[] = $f['jenis'];
         }
+        // Req 4.8: filter kasus anak. '1' hanya kasus anak, '0' hanya yang bukan.
+        if (isset(self::CHILD_FILTER[(string) ($f['anak'] ?? '')])) {
+            $w[] = 'r.is_child = ?';
+            $p[] = (int) $f['anak'];
+        }
         if (!empty($f['pendamping'])) {
             $w[] = 'r.assigned_to = ?';
             $p[] = (int) $f['pendamping'];
@@ -259,12 +349,21 @@ final class Report
         return (int) Database::value("SELECT COUNT(*) FROM reports r WHERE $where", $params);
     }
 
-    /** New and urgent first: diterima, then "in danger", then urgency, newest first. */
+    /**
+     * New and urgent first: diterima, then "in danger", then urgency, newest first.
+     *
+     * `last_survivor_at` dan `last_reply_at` adalah kolom turunan yang dibaca
+     * `Sla::isOverdue` untuk lencana "Lewat SLA" (Req 6.8). `last_reply_at`
+     * hanya dari pesan `companion`: pesan `system` bukan balasan pendamping,
+     * sama seperti yang dipakai `bin/reminders.php`.
+     */
     public static function queue(array $filters, int $limit, int $offset): array
     {
         [$where, $params] = self::queueWhere($filters);
         return Database::all(
-            "SELECT r.id, r.code, r.user_id, r.category, r.in_danger, r.urgency, r.status, r.province, r.city, r.created_at, r.updated_at, u.name AS companion_name
+            "SELECT r.id, r.code, r.user_id, r.category, r.in_danger, r.urgency, r.status, r.province, r.city, r.reporter_type, r.is_child, r.created_at, r.updated_at, u.name AS companion_name,
+               (SELECT MAX(m.created_at) FROM messages m WHERE m.report_id = r.id AND m.sender_role = 'survivor')  AS last_survivor_at,
+               (SELECT MAX(m.created_at) FROM messages m WHERE m.report_id = r.id AND m.sender_role = 'companion') AS last_reply_at
              FROM reports r LEFT JOIN users u ON u.id = r.assigned_to
              WHERE $where
              ORDER BY (r.status = 'diterima') DESC, r.in_danger DESC, FIELD(r.urgency, 'tinggi', 'sedang', 'rendah'), r.created_at DESC
@@ -316,11 +415,17 @@ final class Report
         return (int) Database::value("SELECT COUNT(*) FROM reports WHERE assigned_to = ? AND status IN ('didampingi','dirujuk')", [$companionId]);
     }
 
-    /** Active companions in a region first, then by lightest workload. */
+    /**
+     * Active companions in a region first, then by lightest workload.
+     *
+     * `child_trained` ikut terpilih karena `Assignment::candidates` memakainya
+     * untuk menyaring kandidat kasus anak (Req 4.9). Tanpa kolom ini setiap
+     * kasus anak akan terbaca sebagai wilayah tanpa pendamping terlatih.
+     */
     public static function companionsByLoad(?string $city): array
     {
         return Database::all(
-            "SELECT u.id, u.name, u.region,
+            "SELECT u.id, u.name, u.region, u.child_trained,
                (SELECT COUNT(*) FROM reports r WHERE r.assigned_to = u.id AND r.status IN ('didampingi','dirujuk')) AS active
              FROM users u WHERE u.role = 'companion' AND u.is_active = 1
              ORDER BY (u.region <=> ?) DESC, active, u.name",

@@ -53,6 +53,9 @@ $menus = [
 ];
 $roleLabel = Auth::ROLE_LABEL[$role];
 $initials = initials($user['name']);
+// Keluar cepat hanya untuk penyintas; halaman pendamping dan admin tidak memuatnya (Req 8.15).
+$quickExit = $role === 'survivor' ? ($quickExit ?? 'icon') : 'none';
+$liteLayout = lite();
 // Sidebar counters (only shown when > 0).
 $counts = ['notifikasi' => Notifier::unreadCount((int) $user['id'])];
 if ($role === 'companion') {
@@ -63,13 +66,13 @@ if ($role === 'admin') {
 }
 ?>
 <!doctype html>
-<html lang="id">
+<html lang="<?= e(lang()) ?>">
 <head>
 <?php include APP_PATH . '/views/partials/head.php'; ?>
 </head>
-<body class="app-body">
+<body class="app-body<?= $liteLayout ? ' is-lite' : '' ?>"<?= $liteLayout ? ' data-lite' : '' ?>>
 <?php include APP_PATH . '/views/partials/icons.php'; ?>
-<a class="skip-link" href="#main">Lewati ke konten</a>
+<a class="skip-link" href="#konten"><?= te('a11y.skip') ?></a>
 <header class="app-header">
   <div class="app-header-inner">
     <button class="icon-btn sidebar-toggle" type="button" aria-expanded="false" aria-controls="sidebar" data-sidebar-toggle>
@@ -110,7 +113,7 @@ if ($role === 'admin') {
     </div>
   </div>
 </header>
-<?php include APP_PATH . '/views/partials/quick-exit.php'; ?>
+<?php if ($quickExit !== 'none') include APP_PATH . '/views/partials/quick-exit.php'; ?>
 <?php include APP_PATH . '/views/partials/flash.php'; ?>
 <div class="app-shell">
   <aside class="sidebar" id="sidebar" aria-label="Navigasi <?= e(mb_strtolower($roleLabel)) ?>" data-sidebar>
@@ -124,10 +127,13 @@ if ($role === 'admin') {
         </ul>
       </div>
     <?php endforeach; ?>
-    <div class="sidebar-foot"><p><?= icon('lock') ?> Sesi otomatis berakhir setelah <?= Config::int('SESSION_IDLE_MINUTES', 30) ?> menit tanpa aktivitas.</p></div>
+    <div class="sidebar-foot">
+      <p><?= icon('lock') ?> Sesi otomatis berakhir setelah <?= Config::int('SESSION_IDLE_MINUTES', 30) ?> menit tanpa aktivitas.</p>
+      <?php $prefsLight = true; include APP_PATH . '/views/partials/prefs.php'; ?>
+    </div>
   </aside>
   <div class="sidebar-scrim" data-sidebar-scrim hidden></div>
-  <main id="main" class="app-main">
+  <main id="konten" tabindex="-1" class="app-main">
     <?= $content ?>
   </main>
 </div>

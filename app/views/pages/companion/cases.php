@@ -16,9 +16,9 @@
     <table class="table">
       <thead><tr><th scope="col">Kode</th><th scope="col">Jenis</th><th scope="col">Status</th><th scope="col">Urgensi</th><th scope="col">Wilayah</th><th scope="col">Aktivitas terakhir</th><th scope="col"><span class="sr-only">Aksi</span></th></tr></thead>
       <tbody>
-        <?php foreach ($rows as $r): $hot = (int) $r['unread'] > 0; ?>
+        <?php foreach ($rows as $r): $hot = (int) $r['unread'] > 0; $byWitness = (string) ($r['reporter_type'] ?? 'korban') === ConsentGuard::WITNESS; ?>
           <tr class="<?= $hot ? 'is-unread-row' : '' ?>">
-            <td data-label="Kode" class="mono"><a class="row-link" href="<?= e(url('/pendamping/kasus/' . $r['code'])) ?>"><?= e($r['code']) ?></a><?php if ($hot): ?><span class="cell-sub"><?= (int) $r['unread'] ?> pesan belum dibaca</span><?php endif; ?></td>
+            <td data-label="Kode" class="mono"><a class="row-link" href="<?= e(url('/pendamping/kasus/' . $r['code'])) ?>"><?= e($r['code']) ?></a><?php if ($hot): ?><span class="cell-sub"><?= (int) $r['unread'] ?> pesan belum dibaca</span><?php endif; ?><?php if ($byWitness): ?><span class="cell-sub">Dilaporkan oleh saksi</span><?php endif; ?></td>
             <td data-label="Jenis"><?= e(Report::CATEGORIES[$r['category']]) ?></td>
             <td data-label="Status"><?= status_badge($r['status']) ?></td>
             <td data-label="Urgensi"><?= urgency_badge($r['urgency']) ?></td>

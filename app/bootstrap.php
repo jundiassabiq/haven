@@ -14,7 +14,7 @@ date_default_timezone_set('Asia/Jakarta');
 mb_internal_encoding('UTF-8');
 
 spl_autoload_register(static function (string $class): void {
-    foreach (['core', 'controllers', 'models'] as $dir) {
+    foreach (['core', 'core/rules', 'controllers', 'models'] as $dir) {
         $file = APP_PATH . "/$dir/$class.php";
         if (is_file($file)) {
             require $file;

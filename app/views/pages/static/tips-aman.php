@@ -1,4 +1,4 @@
-<main id="main">
+<main id="konten" tabindex="-1">
     <section class="page-head">
       <div class="container">
         <h1 class="h2">Membuka Haven tanpa ketahuan</h1>
@@ -9,7 +9,7 @@
     <div class="container article-layout">
       <div class="prose">
         <h2 class="mt-0">Keluar cepat</h2>
-        <p>Tombol <strong>Keluar cepat</strong> ada di pojok kanan bawah setiap halaman. Saat ditekan, halaman berganti ke pencarian cuaca, dan tombol Kembali tidak membawamu ke Haven. Di keyboard, tekan <strong>Esc dua kali</strong> dengan cepat.</p>
+        <p>Tombol <strong>Keluar cepat</strong> ada di pojok kanan bawah halaman publik dan halaman penyintas. Di halaman publik selain form lapor, halaman kasus, dan halaman lacak, tombol itu berupa ikon yang labelnya muncul saat kursor di atasnya atau saat kamu berpindah ke sana dengan Tab. Saat ditekan, halaman berganti ke pencarian cuaca, dan tombol Kembali tidak membawamu ke Haven. Di keyboard, tekan <strong>Esc dua kali</strong> dengan cepat.</p>
 
         <h2>Pakai jendela penyamaran</h2>
         <p>Buka Haven di jendela penyamaran (Incognito di Chrome, InPrivate di Edge, Private di Safari dan Firefox). Riwayat dan cookie terhapus saat jendela itu ditutup.</p>

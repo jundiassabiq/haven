@@ -3,6 +3,8 @@
  * Survivor view of one report (anonymous via code+PIN, or the account owner).
  * @var array $report  @var array $logs  @var ?array $companion  @var int $attachCount  @var array $notifs
  * @var array $upcoming  @var array $past  @var array $slots  @var ?array $service  @var int $unread  @var bool $accountView
+ * @var ?array $childPanel  panel rujukan anak, hanya terisi untuk kasus anak (Req 4.4)
+ * @var int $slaHours  batas waktu balasan untuk kasus ini, dalam jam (Req 6.2)
  */
 $code = $report['code'];
 $status = $report['status'];
@@ -33,6 +35,8 @@ $chatNote = match (true) {
     <div class="case-meta">
       <span><?= icon('calendar') ?>Dilaporkan <?= e(id_date($report['created_at'])) ?></span>
       <span><?= icon('user') ?>Pendamping: <?= $companion ? e(short_name($companion['name'])) : 'belum ditugaskan' ?></span>
+      <?php /* Batas waktu balasan untuk kasus ini, dalam jam, dari konfigurasi SLA (Req 6.2). */ ?>
+      <span><?= icon('clock') ?><?= te('track.sla', ['jam' => $slaHours]) ?></span>
       <span><?= icon('lock') ?>Terenkripsi</span>
     </div>
   </div>
@@ -40,6 +44,13 @@ $chatNote = match (true) {
     <button class="btn btn-ghost btn-sm" type="button" data-open-dialog="dlg-end">Tutup sesi laporan</button>
   <?php endif; ?>
 </div>
+
+<?php /* Panel rujukan anak di luar tab, supaya selalu terlihat tanpa klik (Req 4.4). */ ?>
+<?php if (!empty($childPanel)): ?>
+  <div style="margin-bottom:24px">
+    <?php include APP_PATH . '/views/partials/child-referral.php'; ?>
+  </div>
+<?php endif; ?>
 
 <div data-tabs>
   <div class="subtabs" role="tablist" aria-label="Bagian laporan">
@@ -210,7 +221,7 @@ $chatNote = match (true) {
     <?php if ($service): ?>
       <div class="grid-2">
         <ul class="service-list">
-          <?php $s = $service; $showContactUnverified = true; include APP_PATH . '/views/partials/service-item.php'; ?>
+          <?php $s = $service; include APP_PATH . '/views/partials/service-item.php'; ?>
         </ul>
         <div class="alert alert-info">
           <?= icon('info') ?>

@@ -2,122 +2,217 @@
 declare(strict_types=1);
 
 /**
- * Module 10: aggregate statistics. No report content is ever read here.
- * Privacy rule: any category with fewer than MIN_GROUP reports is merged into "Lainnya";
- * if the merged group is itself below MIN_GROUP it is not shown at all.
+ * Module 10: statistik agregat. Isi laporan tidak pernah dibaca di sini.
+ *
+ * Setiap hitungan yang keluar dari kelas ini melewati Aggregator::merge dan
+ * penjaga self::safe(), jadi dua invarian privasi berlaku di jalur nyata
+ * (halaman admin, JSON grafik, berkas ekspor), bukan hanya di fungsi murni:
+ *
+ *   - tidak ada baris dengan hitungan 1 sampai 4 (Req 7.10)
+ *   - jumlah seluruh grup sama dengan total laporan dalam rentang (Req 7.11)
+ *
+ * Bila salah satu invarian gagal, rincian dibuang dan halaman menampilkan
+ * "data belum cukup". Lebih baik kehilangan satu tabel daripada menunjukkan
+ * satu sel yang bisa menunjuk ke satu penyintas di kota kecil.
+ *
+ * Req 10.1: semua query di sini hanya menyebut kolom pada self::COLUMNS.
+ * `chronology_enc`, `contact_enc`, dan `victim_contact_enc` tidak pernah
+ * dibaca, jadi halaman statistik dan ekspor agregat tidak membuka jalur baru
+ * ke kronologi untuk admin.
  */
 final class Stats
 {
-    public const MIN_GROUP = 5;
-    public const RANGES = ['30h' => '30 hari terakhir', '12b' => '12 bulan terakhir', 'tahun' => 'Tahun ini'];
+    /** Hitungan terkecil yang boleh berdiri sebagai satu baris (Req 7.3). */
+    public const MIN_GROUP = Aggregator::MIN_CELL;
+
+    /** Dimensi Req 7.1 dan namanya di layar serta di kolom `dimensi` berkas ekspor. */
+    public const DIMENSIONS = [
+        'category' => 'Jenis kejadian',
+        'province' => 'Provinsi',
+        'month' => 'Bulan',
+        'status' => 'Status',
+    ];
+
+    /** Dimensi silang Req 7.4. */
+    public const CROSS = ['category', 'province'];
+    public const CROSS_LABEL = 'Jenis kejadian dan provinsi';
+
+    /** Panjang rentang bawaan halaman statistik, dalam bulan. */
+    public const DEFAULT_MONTHS = 12;
+
+    /** Satu-satunya kolom `reports` yang boleh dibaca statistik (Req 10.1). */
+    public const COLUMNS = ['category', 'province', 'status', 'in_danger', 'created_at'];
+
+    /** Pesan pada kartu angka saat rentang terlalu sepi untuk ditampilkan (Req 7.13). */
+    public const INSUFFICIENT_SHORT = 'Data belum cukup';
 
     /**
-     * @param array<string,int> $counts label => n
-     * @return array{labels:string[], values:int[], hidden:int}
+     * Rentang tanggal pilihan admin, atau pesan galat Bahasa Indonesia bila
+     * rentangnya tidak sah (Req 7.12). Dua kolom kosong berarti admin belum
+     * memilih apa pun, jadi halaman memakai rentang bawaan, bukan galat.
+     *
+     * Pemanggil wajib memeriksa `is_string`: selama hasilnya teks, tidak ada
+     * statistik yang boleh tampil dan tidak ada berkas ekspor yang boleh dibuat.
+     *
+     * @return array{from:string, to:string, from_at:string, to_at:string}|string
      */
-    public static function mergeSmall(array $counts, int $min = self::MIN_GROUP, string $other = 'Lainnya'): array
+    public static function range(string $from = '', string $to = ''): array|string
     {
-        arsort($counts);
-        $labels = [];
-        $values = [];
-        $small = 0;
-        foreach ($counts as $label => $n) {
-            if ($n >= $min) {
-                $labels[] = (string) $label;
-                $values[] = (int) $n;
-            } else {
-                $small += (int) $n;
-            }
+        if ($from === '' && $to === '') {
+            return self::defaultRange();
         }
-        $hidden = 0;
-        if ($small >= $min) {
-            $labels[] = "$other (< $min digabung)";
-            $values[] = $small;
-        } else {
-            $hidden = $small;
-        }
-        return ['labels' => $labels, 'values' => $values, 'hidden' => $hidden];
+
+        return Aggregator::parseRange($from, $to);
     }
 
-    public static function since(string $range): string
+    /** Rentang bawaan: awal bulan DEFAULT_MONTHS bulan lalu sampai hari ini. */
+    public static function defaultRange(): array
     {
-        return match ($range) {
-            '30h' => date('Y-m-d H:i:s', time() - 30 * 86400),
-            'tahun' => date('Y') . '-01-01 00:00:00',
-            default => date('Y-m-01 00:00:00', strtotime('first day of -11 months')),
-        };
-    }
-
-    /** ['2026-01' => 'Jan', …] for the last $n months, oldest first. */
-    public static function monthKeys(int $n): array
-    {
-        $out = [];
-        for ($i = $n - 1; $i >= 0; $i--) {
-            $t = strtotime("first day of -$i months");
-            $out[date('Y-m', $t)] = ID_MONTHS[(int) date('n', $t)];
+        $from = date('Y-m-01', (int) strtotime('first day of -' . (self::DEFAULT_MONTHS - 1) . ' months'));
+        $range = Aggregator::parseRange($from, date('Y-m-d'));
+        if (is_string($range)) {
+            // Tidak terjangkau: kedua tanggal dibuat oleh date() sendiri.
+            throw new LogicException('Rentang bawaan statistik tidak sah: ' . $range);
         }
-        return $out;
+
+        return $range;
     }
 
-    private static function perMonth(string $sql, int $months): array
+    /**
+     * Baris laporan dalam rentang, hanya kolom yang dibutuhkan agregasi
+     * (Req 10.1). Slug kategori dan status diterjemahkan ke label tampilan di
+     * sini, sebelum penggabungan sel kecil, supaya layar dan berkas ekspor
+     * memakai nama yang sama.
+     *
+     * @param array{from_at:string, to_at:string} $range
+     * @return list<array<string,mixed>>
+     */
+    public static function rows(array $range): array
     {
-        $keys = self::monthKeys($months);
-        $rows = Database::all($sql, [array_key_first($keys) . '-01 00:00:00']);
-        $map = array_column($rows, 'n', 'ym');
-        return array_map(static fn ($k) => (int) ($map[$k] ?? 0), array_keys($keys));
-    }
+        $rows = Database::all(
+            'SELECT ' . implode(', ', self::COLUMNS) . ' FROM reports WHERE created_at BETWEEN ? AND ?',
+            [$range['from_at'], $range['to_at']]
+        );
 
-    public static function charts(string $range): array
-    {
-        $since = self::since($range);
-        $m12 = self::monthKeys(12);
-        $trend = self::perMonth("SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym, COUNT(*) AS n FROM reports WHERE created_at >= ? GROUP BY ym", 12);
-
-        $m6 = self::monthKeys(6);
-        $new = self::perMonth("SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym, COUNT(*) AS n FROM reports WHERE created_at >= ? GROUP BY ym", 6);
-        $done = self::perMonth("SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym, COUNT(*) AS n FROM report_status_logs WHERE to_status = 'selesai' AND created_at >= ? GROUP BY ym", 6);
-
-        $cats = [];
-        foreach (Database::all('SELECT category, COUNT(*) AS n FROM reports WHERE created_at >= ? GROUP BY category', [$since]) as $r) {
-            $cats[Report::CATEGORIES[$r['category']] ?? $r['category']] = (int) $r['n'];
+        foreach ($rows as $i => $row) {
+            $rows[$i]['category'] = Report::CATEGORIES[$row['category']] ?? (string) $row['category'];
+            $rows[$i]['status'] = Report::STATUS[$row['status']] ?? (string) $row['status'];
         }
-        $merged = self::mergeSmall($cats);
-        $catText = implode(', ', array_map(static fn ($l, $v) => "$l $v", $merged['labels'], $merged['values']));
+
+        return $rows;
+    }
+
+    /**
+     * Seluruh angka halaman statistik untuk satu rentang: rincian per dimensi
+     * (Req 7.1), satu rincian silang (Req 7.4), median waktu balasan dan
+     * persentase SLA (Req 7.2).
+     *
+     * `empty` benar bila rentang tidak punya laporan sama sekali, `insufficient`
+     * benar bila totalnya 1 sampai 4. Pada keadaan kedua tidak ada satu pun
+     * baris rincian, dan median serta persentase SLA ikut ditahan: dengan
+     * sesedikit itu, angkanya adalah angka satu kasus (Req 7.13).
+     *
+     * @param array{from:string, to:string, from_at:string, to_at:string} $range
+     */
+    public static function aggregate(array $range): array
+    {
+        $rows = self::rows($range);
+        $total = count($rows);
+        $insufficient = $total > 0 && $total < self::MIN_GROUP;
+
+        $sections = [];
+        foreach (array_keys(self::DIMENSIONS) as $dim) {
+            $sections[$dim] = self::safe(Aggregator::breakdown($rows, $dim), $total);
+        }
+
+        $replies = $insufficient ? [] : self::replies($range);
+        $met = self::slaMet($replies);
+
+        return [
+            'range' => $range,
+            'total' => $total,
+            'empty' => $total === 0,
+            'insufficient' => $insufficient,
+            'sections' => $sections,
+            'cross' => self::safe(Aggregator::cross($rows, self::CROSS[0], self::CROSS[1]), $total),
+            'median' => Aggregator::medianHours(array_column($replies, 'minutes')),
+            'replied' => count($replies),
+            'sla' => Aggregator::slaPercent($met, count($replies)),
+            'sla_met' => $met,
+            'sla_hours' => ['danger' => sla_hours(true), 'default' => sla_hours(false)],
+        ];
+    }
+
+    /**
+     * Berkas ekspor agregat (Req 7.5, 7.6). Isinya baris yang sudah digabung
+     * dan sudah lolos penjaga invarian, jadi ekspor tidak pernah memuat sel
+     * yang tidak boleh tampil di layar.
+     *
+     * @param array{from:string, to:string, from_at:string, to_at:string} $range
+     */
+    public static function csv(array $range): string
+    {
+        $agg = self::aggregate($range);
+
+        $sections = [];
+        foreach (self::DIMENSIONS as $dim => $label) {
+            $sections[$label] = $agg['sections'][$dim]['rows'];
+        }
+        $sections[self::CROSS_LABEL] = $agg['cross']['rows'];
+
+        return Aggregator::csv($sections, self::MIN_GROUP);
+    }
+
+    /** Nama berkas ekspor, memuat rentang supaya berkas lama tidak tertukar. */
+    public static function exportFilename(array $range): string
+    {
+        return 'haven-statistik-' . $range['from'] . '-sampai-' . $range['to'] . '.csv';
+    }
+
+    /**
+     * Data grafik untuk halaman admin. Hanya dua grafik, keduanya memakai
+     * rincian yang sudah digabung: laporan per bulan dan jenis kejadian.
+     * Label teks di `label` adalah padanan grafik untuk pembaca layar.
+     *
+     * @param array{from:string, to:string, from_at:string, to_at:string} $range
+     */
+    public static function charts(array $range): array
+    {
+        $agg = self::aggregate($range);
+        $months = self::chronological($agg['sections']['month']['rows']);
+        $categories = $agg['sections']['category'];
 
         return [
             'trend' => [
-                'type' => 'line', 'labels' => array_values($m12), 'series' => [['name' => 'Laporan', 'values' => $trend]],
-                'label' => 'Grafik garis laporan per bulan selama 12 bulan terakhir: ' . implode(', ', array_map(static fn ($l, $v) => "$l $v", $m12, $trend)) . '.',
+                'type' => 'bar',
+                'labels' => array_keys($months),
+                'series' => [['name' => 'Laporan', 'values' => array_values($months)]],
+                'label' => 'Grafik batang laporan per bulan, ' . self::rangeText($range) . ': ' . self::seriesText($months, $agg) . '.',
             ],
             'categories' => [
-                'type' => 'hbar', 'labels' => $merged['labels'], 'series' => [['name' => 'Kasus', 'values' => $merged['values']]], 'hidden' => $merged['hidden'],
-                'label' => 'Jenis kejadian, ' . self::RANGES[$range] . ': ' . ($catText ?: 'belum ada data') . '.',
-            ],
-            'status' => [
-                'type' => 'bar', 'labels' => array_values($m6), 'series' => [['name' => 'Baru', 'values' => $new], ['name' => 'Selesai', 'values' => $done]],
-                'label' => 'Grafik batang kasus baru dan selesai per bulan, 6 bulan terakhir. Baru: ' . implode(', ', $new) . '. Selesai: ' . implode(', ', $done) . '.',
+                'type' => 'hbar',
+                'labels' => $categories['labels'],
+                'series' => [['name' => 'Kasus', 'values' => $categories['values']]],
+                'hidden' => $categories['hidden'],
+                'label' => 'Grafik batang jenis kejadian, ' . self::rangeText($range) . ': ' . self::seriesText($categories['rows'], $agg) . '.',
             ],
         ];
     }
 
-    public static function kpis(string $range): array
+    /** "1 Januari 2026 sampai 31 Maret 2026" untuk judul dan label grafik. */
+    public static function rangeText(array $range): string
     {
-        $since = self::since($range);
-        $avgMin = Database::value(
-            "SELECT AVG(TIMESTAMPDIFF(MINUTE, l.created_at,
-                (SELECT MIN(m.created_at) FROM messages m WHERE m.report_id = l.report_id AND m.sender_role = 'companion' AND m.created_at >= l.created_at)))
-             FROM report_status_logs l WHERE l.to_status = 'didampingi' AND l.created_at >= ?",
-            [$since]
-        );
-        $oldestWaiting = Database::value("SELECT MIN(created_at) FROM reports WHERE status = 'diterima'");
+        return id_date($range['from'], false, true) . ' sampai ' . id_date($range['to'], false, true);
+    }
+
+    /** Angka operasional antrean admin. Bukan rincian per dimensi, jadi di luar penggabungan sel kecil. */
+    public static function kpis(): array
+    {
         return [
-            'total' => (int) Database::value('SELECT COUNT(*) FROM reports WHERE created_at >= ?', [$since]),
-            'thisMonth' => (int) Database::value('SELECT COUNT(*) FROM reports WHERE created_at >= ?', [date('Y-m-01 00:00:00')]),
             'waiting' => (int) Database::value("SELECT COUNT(*) FROM reports WHERE status = 'diterima'"),
-            'oldestWaiting' => $oldestWaiting,
+            'oldestWaiting' => Database::value("SELECT MIN(created_at) FROM reports WHERE status = 'diterima'"),
             'active' => (int) Database::value("SELECT COUNT(*) FROM reports WHERE status IN ('didampingi','dirujuk')"),
             'companions' => (int) Database::value("SELECT COUNT(DISTINCT assigned_to) FROM reports WHERE status IN ('didampingi','dirujuk')"),
-            'avgHours' => $avgMin === null ? null : round((float) $avgMin / 60, 1),
         ];
     }
 
@@ -179,5 +274,138 @@ final class Stats
                 [$id]
             ),
         ];
+    }
+
+    /**
+     * Rincian yang sudah digabung dan sudah diperiksa. Penjaga terakhir untuk
+     * Req 7.10 dan 7.11 di jalur nyata: satu saja sel 1 sampai 4, atau jumlah
+     * grup yang tidak sama dengan total, membuat seluruh rincian ditahan.
+     *
+     * @param array<string,int> $counts
+     */
+    private static function safe(array $counts, int $total): array
+    {
+        $merged = Aggregator::merge($counts, self::MIN_GROUP);
+
+        $sum = 0;
+        foreach ($merged['rows'] as $n) {
+            if ($n < self::MIN_GROUP) {
+                return self::suppressed($total, 'ada sel di bawah ' . self::MIN_GROUP);
+            }
+            $sum += $n;
+        }
+        if ($merged['rows'] !== [] && $sum !== $total) {
+            return self::suppressed($total, 'jumlah grup ' . $sum . ' tidak sama dengan total ' . $total);
+        }
+
+        return $merged;
+    }
+
+    /** Rincian ditahan. Catatan log tidak memuat label maupun isi laporan. */
+    private static function suppressed(int $total, string $why): array
+    {
+        Logger::error('Stats: rincian agregat ditahan karena ' . $why . '.');
+
+        return [
+            'labels' => [],
+            'values' => [],
+            'rows' => [],
+            'total' => $total,
+            'hidden' => $total,
+            'insufficient' => true,
+            'merged' => true,
+        ];
+    }
+
+    /**
+     * Waktu balasan pertama per laporan, dalam menit, untuk laporan yang dibuat
+     * di dalam rentang (Req 7.2): dari baris `report_status_logs` berstatus
+     * "diterima" ke pesan pendamping pertama di `messages`. Laporan tanpa
+     * balasan pendamping tidak punya baris di sini, jadi median menjadi null
+     * dan tampilannya "belum ada data" (Req 7.14).
+     *
+     * @return list<array{in_danger:mixed, minutes:mixed}>
+     */
+    private static function replies(array $range): array
+    {
+        return Database::all(
+            "SELECT r.in_danger, TIMESTAMPDIFF(MINUTE, l.received_at, m.first_reply_at) AS minutes
+               FROM reports r
+               JOIN (SELECT report_id, MIN(created_at) AS received_at FROM report_status_logs
+                      WHERE to_status = 'diterima' GROUP BY report_id) l ON l.report_id = r.id
+               JOIN (SELECT report_id, MIN(created_at) AS first_reply_at FROM messages
+                      WHERE sender_role = 'companion' GROUP BY report_id) m ON m.report_id = r.id
+              WHERE r.created_at BETWEEN ? AND ? AND m.first_reply_at >= l.received_at",
+            [$range['from_at'], $range['to_at']]
+        );
+    }
+
+    /**
+     * Jumlah kasus yang dibalas di dalam batas SLA-nya. Batas jamnya dari
+     * Sla::hours lewat sla_hours(), jadi angka 2 dan 48 jam hanya ada di
+     * konfigurasi (Req 6.1, 7.2).
+     *
+     * @param list<array{in_danger:mixed, minutes:mixed}> $replies
+     */
+    private static function slaMet(array $replies): int
+    {
+        $met = 0;
+        foreach ($replies as $reply) {
+            $minutes = $reply['minutes'];
+            if (!is_numeric($minutes) || (float) $minutes < 0) {
+                continue;
+            }
+            if ((float) $minutes <= sla_hours((bool) (int) $reply['in_danger']) * 60) {
+                $met++;
+            }
+        }
+
+        return $met;
+    }
+
+    /**
+     * Baris bulan diurutkan dari bulan terlama, "Lainnya" di belakang. Hanya
+     * urutan yang berubah, hitungannya tidak, jadi totalnya tetap (Req 7.11).
+     *
+     * @param array<string,int> $rows
+     * @return array<string,int>
+     */
+    private static function chronological(array $rows): array
+    {
+        $other = null;
+        if (array_key_exists(Aggregator::OTHER_LABEL, $rows)) {
+            $other = $rows[Aggregator::OTHER_LABEL];
+            unset($rows[Aggregator::OTHER_LABEL]);
+        }
+
+        ksort($rows);
+        if ($other !== null) {
+            $rows[Aggregator::OTHER_LABEL] = $other;
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Isi grafik sebagai teks untuk pembaca layar, atau pesan rentang kosong
+     * dan rentang terlalu sepi (Req 7.13, 7.14).
+     *
+     * @param array<string,int> $rows
+     */
+    private static function seriesText(array $rows, array $agg): string
+    {
+        if ($agg['empty']) {
+            return Aggregator::EMPTY_MESSAGE;
+        }
+        if ($rows === []) {
+            return Aggregator::INSUFFICIENT_MESSAGE;
+        }
+
+        $parts = [];
+        foreach ($rows as $label => $n) {
+            $parts[] = $label . ' ' . $n;
+        }
+
+        return implode(', ', $parts);
     }
 }

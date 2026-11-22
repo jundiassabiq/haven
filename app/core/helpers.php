@@ -153,6 +153,32 @@ function field_aria(string $field, ?string $hintId = null): string
     return $out . ($invalid ? ' aria-invalid="true"' : '');
 }
 
+/**
+ * Kolom tidak valid pertama menurut urutan kolom di halaman, atau null bila tidak ada
+ * galat. Urutan datang dari view karena pesan galat bisa tiba dalam urutan apa pun.
+ *
+ * @param list<string> $order nama kolom dalam urutan tampil
+ */
+function first_invalid_field(array $order): ?string
+{
+    $errors = form_errors();
+    foreach ($order as $field) {
+        if (isset($errors[$field])) {
+            return $field;
+        }
+    }
+    return null;
+}
+
+/**
+ * ` autofocus` bila kolom ini adalah kolom tidak valid pertama (Req 8.3). Tanpa
+ * JavaScript, atribut ini yang memindahkan fokus ke kolom yang perlu diperbaiki.
+ */
+function autofocus_if(?string $firstInvalid, string $field): string
+{
+    return $firstInvalid !== null && $firstInvalid === $field ? ' autofocus' : '';
+}
+
 /* ---------- Dates ---------- */
 
 const ID_MONTHS = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -210,6 +236,148 @@ function short_name(string $name): string
 function initials(string $name): string
 {
     return mb_strtoupper(implode('', array_map(static fn ($w) => mb_substr($w, 0, 1), array_slice(preg_split('/\s+/', trim($name)), 0, 2))));
+}
+
+/* ---------- Bahasa dan mode tampilan (Req 8) ---------- */
+
+/**
+ * Kamus kedua bahasa, dibaca sekali per permintaan.
+ *
+ * `I18n` sengaja murni, jadi pemuatan berkas ada di sini.
+ *
+ * @return array<string,array<string,string>>
+ */
+function lang_dict(): array
+{
+    static $dict = null;
+    if ($dict === null) {
+        $dict = [];
+        foreach (array_keys(I18n::LANGS) as $code) {
+            $file = APP_PATH . '/lang/' . $code . '.php';
+            $table = is_file($file) ? require $file : [];
+            $dict[$code] = is_array($table) ? $table : [];
+        }
+    }
+    return $dict;
+}
+
+/** Kode bahasa aktif untuk atribut `lang` dan untuk `t()` (Req 8.6). */
+function lang(): string
+{
+    $choice = Session::get(I18n::SESSION_KEY);
+    return I18n::lang(is_string($choice) ? $choice : null);
+}
+
+/** Teks antarmuka dalam bahasa aktif, cadangan Bahasa Indonesia (Req 8.5, 8.7). */
+function t(string $key, array $vars = []): string
+{
+    return I18n::t($key, lang(), lang_dict(), $vars);
+}
+
+/** `t()` dengan cadangan teks dari kode bila kunci itu belum ada di kamus mana pun. */
+function t_or(string $key, string $fallback, array $vars = []): string
+{
+    $lang = lang();
+    $dict = lang_dict();
+
+    return I18n::has($key, $lang, $dict) || I18n::has($key, I18n::DEFAULT_LANG, $dict)
+        ? I18n::t($key, $lang, $dict, $vars)
+        : $fallback;
+}
+
+/** `t()` yang sudah di-escape, untuk dipakai langsung di dalam HTML. */
+function te(string $key, array $vars = []): string
+{
+    return e(t($key, $vars));
+}
+
+/** Mode tampilan aktif: `Mode::LITE` atau `Mode::FULL` (Req 8.10, 8.13). */
+function display_mode(): string
+{
+    $choice = Session::get(Mode::SESSION_KEY);
+    return Mode::resolve(is_string($choice) ? $choice : null, $_SERVER['HTTP_SAVE_DATA'] ?? null);
+}
+
+/** Benar bila permintaan ini dilayani dalam mode ringan (Req 8.8, 8.10, 8.13). */
+function lite(): bool
+{
+    return display_mode() === Mode::LITE;
+}
+
+/** Benar bila mode ringan menyala karena header `Save-Data`, bukan karena pilihan pengguna. */
+function lite_by_header(): bool
+{
+    $choice = Session::get(Mode::SESSION_KEY);
+    return lite() && !Mode::chosen(is_string($choice) ? $choice : null);
+}
+
+/** Jalur permintaan sekarang tanpa base path, untuk kolom "kembali" pemilih bahasa dan mode. */
+function current_path(): string
+{
+    $uri = (string) ($_SERVER['REQUEST_URI'] ?? '/');
+    $path = (string) parse_url($uri, PHP_URL_PATH);
+    $base = App::basePath();
+    if ($base !== '' && str_starts_with($path, $base)) {
+        $path = substr($path, strlen($base));
+    }
+    $query = (string) parse_url($uri, PHP_URL_QUERY);
+    return ($path === '' ? '/' : $path) . ($query === '' ? '' : '?' . $query);
+}
+
+/* ---------- Batas layanan ---------- */
+
+/** Jam Reply_SLA dari .env lewat Sla::hours, supaya view tidak menulis angkanya sendiri (Req 6.1). */
+function sla_hours(bool $inDanger): int
+{
+    return Sla::hours($inDanger, [
+        Sla::ENV_DANGER => Config::get(Sla::ENV_DANGER),
+        Sla::ENV_DEFAULT => Config::get(Sla::ENV_DEFAULT),
+    ]);
+}
+
+/**
+ * Benar bila kasus ini sudah melewati batas waktu balasannya (Req 6.8).
+ *
+ * Keputusannya ada di `Sla::isOverdue`; helper ini hanya mengambil konfigurasi
+ * dan waktu sekarang, satu kali per permintaan supaya semua baris antrean
+ * dinilai pada saat yang sama.
+ *
+ * `$case` perlu `in_danger`, `created_at`, dan kolom turunan `last_survivor_at`
+ * serta `last_reply_at` seperti yang dipilih `Report::queue`.
+ */
+function sla_overdue(array $case): bool
+{
+    static $now = null;
+    $now ??= new DateTimeImmutable('now');
+
+    return Sla::isOverdue($case, $now, [
+        Sla::ENV_DANGER => Config::get(Sla::ENV_DANGER),
+        Sla::ENV_DEFAULT => Config::get(Sla::ENV_DEFAULT),
+    ]);
+}
+
+/** "2 jam", atau "2x24 jam" untuk kelipatan 24 jam penuh. Kata "jam" ikut bahasa aktif (Req 8.5). */
+function sla_duration(int $hours): string
+{
+    $unit = t('common.hours');
+    return $hours >= 24 && $hours % 24 === 0 ? intdiv($hours, 24) . 'x24 ' . $unit : $hours . ' ' . $unit;
+}
+
+/**
+ * Pernyataan batas layanan untuk beranda, form lapor, dan halaman tentang (Req 9.5, 9.6):
+ * Haven bukan layanan darurat, batas waktu balasan untuk kasus biasa dan kasus bahaya,
+ * lalu nomor darurat. Angka jam diambil dari konfigurasi SLA, bukan ditulis di view.
+ *
+ * Kalimatnya ada di kamus `service.limit` supaya kaki halaman, panel darurat, dan
+ * halaman publik memakai satu teks yang sama dalam kedua bahasa (Req 8.5, 8.7).
+ * Keluarannya HTML: nomor darurat berupa tautan `tel:`.
+ */
+function service_limit_html(): string
+{
+    return t('service.limit', [
+        'biasa' => e(sla_duration(sla_hours(false))),
+        'bahaya' => e(sla_duration(sla_hours(true))),
+    ]);
 }
 
 /* ---------- Pagination ---------- */

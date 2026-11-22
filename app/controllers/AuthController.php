@@ -200,10 +200,13 @@ final class AuthController
     public static function sendResetMail(array $user, string $token, bool $invite): void
     {
         $link = Mailer::absoluteUrl('/reset-password', ['token' => $token]);
+        // Tipe email menentukan apakah surat tetap dikirim ke pengguna yang
+        // mematikan email. Keduanya satu-satunya jalan masuk ke akun sendiri,
+        // jadi keduanya ada di MailPolicy::ALWAYS (Req 6.14).
         if ($invite) {
-            Mailer::send($user['email'], 'Undangan bergabung di Haven', "Halo {$user['name']},\n\nAdmin Haven membuatkan akun untukmu. Buat kata sandi lewat tautan berikut (berlaku 3 hari):\n$link\n\nJika kamu tidak merasa diundang, abaikan email ini.");
+            Mailer::send($user['email'], 'Undangan bergabung di Haven', "Halo {$user['name']},\n\nAdmin Haven membuatkan akun untukmu. Buat kata sandi lewat tautan berikut (berlaku 3 hari):\n$link\n\nJika kamu tidak merasa diundang, abaikan email ini.", 'invitation');
         } else {
-            Mailer::send($user['email'], 'Atur ulang kata sandi Haven', "Halo {$user['name']},\n\nKami menerima permintaan untuk mengatur ulang kata sandimu. Buka tautan berikut dalam " . PasswordReset::RESET_MINUTES . " menit:\n$link\n\nJika bukan kamu yang meminta, abaikan email ini. Kata sandimu tidak berubah.");
+            Mailer::send($user['email'], 'Atur ulang kata sandi Haven', "Halo {$user['name']},\n\nKami menerima permintaan untuk mengatur ulang kata sandimu. Buka tautan berikut dalam " . PasswordReset::RESET_MINUTES . " menit:\n$link\n\nJika bukan kamu yang meminta, abaikan email ini. Kata sandimu tidak berubah.", 'password_reset');
         }
     }
 }

@@ -1,7 +1,7 @@
 <?php /** @var bool $sent */ ?>
-<main id="main" class="auth">
+<main id="konten" tabindex="-1" class="auth">
   <div class="auth-media">
-    <div class="media"><img src="<?= asset('img/reaching-hands.jpg') ?>" alt="" width="1600" height="1067"></div>
+    <?php if (!lite()): ?><div class="media"><img src="<?= asset('img/reaching-hands.jpg') ?>" alt="" width="1600" height="1067"></div><?php endif; ?>
   </div>
   <div class="auth-panel">
     <div class="auth-form">

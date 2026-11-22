@@ -11,6 +11,7 @@ final class AdminCaseController
             'status' => input('status'),
             'urgensi' => input('urgensi'),
             'jenis' => input('jenis'),
+            'anak' => input('anak'),
             'pendamping' => input('pendamping'),
         ];
     }
@@ -43,12 +44,20 @@ final class AdminCaseController
     {
         $r = self::load($p['code']);
         Audit::log('report.triage', 'report', $r['code'], 'Membuka data pemilahan');
+        // Req 4.9, 4.10: daftar pendamping yang ditawarkan ditentukan Assignment,
+        // bukan hasil query mentah. Kasus anak hanya menawarkan pendamping
+        // terlatih di wilayah laporan; bila tidak ada, Admin melihat peringatan
+        // dan harus mengonfirmasi penugasannya.
+        $assignment = Assignment::candidates(Report::companionsByLoad($r['city']), $r);
         View::show('pages/admin/case', [
             'title' => 'Tinjau ' . $r['code'] . ' | Admin Haven',
             'active' => 'antrean',
-            'report' => $r,
+            // Req 10.1: halaman admin tidak pernah menampilkan kronologi atau
+            // kontak, jadi kolom terenkripsinya dibuang sebelum ke view.
+            'report' => Report::withoutCiphertext($r),
             'companion' => $r['assigned_to'] ? User::find((int) $r['assigned_to']) : null,
-            'companions' => Report::companionsByLoad($r['city']),
+            'companions' => $assignment['list'],
+            'assignment' => $assignment,
             'logs' => Report::statusLogs((int) $r['id']),
             'access' => AuditLog::forObject('report', $r['code'], 12),
             'attachCount' => Report::attachmentCount((int) $r['id']),
@@ -63,6 +72,8 @@ final class AdminCaseController
         $companionId = (int) input('pendamping');
         $note = mb_substr(input('catatan'), 0, 500);
         $companion = $companionId ? User::find($companionId) : null;
+        $assignment = Assignment::candidates(Report::companionsByLoad($r['city']), $r);
+        $confirmed = input('confirm') === '1';
 
         $errors = [];
         if (!isset(Report::URGENCY[$urgency])) {
@@ -70,6 +81,13 @@ final class AdminCaseController
         }
         if (!$companion || $companion['role'] !== 'companion' || !(int) $companion['is_active']) {
             $errors['pendamping'] = 'Pilih pendamping aktif yang akan menangani.';
+        } else {
+            // Req 4.9, 4.10: pendamping di luar daftar kandidat ditolak, dan
+            // jalur peringatan kasus anak butuh konfirmasi Admin.
+            $assignError = CaseWorkflow::assignmentError($assignment, $companionId, $confirmed);
+            if ($assignError !== null) {
+                $errors['pendamping'] = $assignError;
+            }
         }
         if ($errors) {
             back_with($back, $errors, ['urgensi' => $urgency, 'pendamping' => (string) $companionId, 'catatan' => $note]);
@@ -87,7 +105,11 @@ final class AdminCaseController
                 $r = CaseWorkflow::transition($r, 'ditinjau');
             }
             if ($r['status'] === 'ditinjau') {
-                $r = CaseWorkflow::transition($r, 'didampingi', ['companion_id' => $companionId]);
+                $r = CaseWorkflow::transition($r, 'didampingi', [
+                    'companion_id' => $companionId,
+                    'candidates' => $assignment,
+                    'confirm' => $confirmed,
+                ]);
                 $msg = $r['code'] . ' ditugaskan ke ' . $companion['name'] . '. Notifikasi dikirim.';
             } elseif (in_array($r['status'], CaseWorkflow::ACTIVE, true)) {
                 if ((int) $r['assigned_to'] === $companionId) {

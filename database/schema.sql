@@ -6,8 +6,8 @@ USE haven_v2;
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS rate_limits, audit_logs, notifications, quiz_attempts, quiz_options, quiz_questions, quizzes,
-  articles, article_categories, messages, bookings, companion_slots, case_notes, report_status_logs,
-  report_attachments, reports, services, password_resets, users;
+  articles, article_categories, messages, bookings, companion_slots, case_notes, mail_queue, report_reminders, report_consents,
+  report_status_logs, report_attachments, reports, services, password_resets, users;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ---------- Module 1: accounts ----------
@@ -18,6 +18,8 @@ CREATE TABLE users (
   password_hash       VARCHAR(255) NOT NULL,
   role                ENUM('survivor','companion','admin') NOT NULL DEFAULT 'survivor',
   region              VARCHAR(100) NULL COMMENT 'Wilayah kerja pendamping',
+  -- Area A (sdg5-improvements)
+  child_trained       TINYINT(1)   NOT NULL DEFAULT 0 COMMENT 'Pendamping terlatih kasus anak',
   allow_email         TINYINT(1)   NOT NULL DEFAULT 1,
   allow_whatsapp      TINYINT(1)   NOT NULL DEFAULT 0,
   safe_time           VARCHAR(120) NULL,
@@ -71,7 +73,9 @@ CREATE TABLE reports (
   code                 CHAR(9)      NOT NULL COMMENT 'HV-XXXXXX',
   pin_hash             VARCHAR(255) NOT NULL,
   user_id              INT UNSIGNED NULL COMMENT 'NULL = anonim',
-  category             ENUM('nonfisik','fisik','ksbe','pemaksaan','eksploitasi','belum-yakin') NOT NULL,
+  category             ENUM('nonfisik','fisik','ksbe','pemaksaan','eksploitasi','belum-yakin',
+                            'kdrt','kekerasan-pacaran','psikis','ekonomi','perkawinan-anak','perdagangan-orang') NOT NULL
+                       COMMENT 'Sama dengan kunci Report::CATEGORIES',
   in_danger            TINYINT(1)   NOT NULL DEFAULT 0,
   ongoing              ENUM('ya','tidak','tidak-tahu') NOT NULL DEFAULT 'tidak-tahu',
   urgency              ENUM('tinggi','sedang','rendah') NOT NULL DEFAULT 'sedang',
@@ -84,6 +88,11 @@ CREATE TABLE reports (
   chronology_enc       MEDIUMTEXT   NOT NULL,
   contact_channels     VARCHAR(60)  NOT NULL DEFAULT 'pesan',
   contact_enc          TEXT         NULL COMMENT 'JSON {email, wa}, encrypted',
+  -- Area A (sdg5-improvements)
+  reporter_type        ENUM('korban','saksi') NOT NULL DEFAULT 'korban' COMMENT 'Peran pelapor',
+  victim_age_answer    ENUM('ya','tidak','tidak-yakin') NULL COMMENT 'Korban di bawah 18 tahun? NULL = laporan sebelum fitur ini',
+  is_child             TINYINT(1)   NOT NULL DEFAULT 0 COMMENT 'Kasus anak, diturunkan oleh ReportIntake::derive',
+  victim_contact_enc   TEXT         NULL COMMENT 'Kontak korban dari saksi, encrypted',
   assigned_to          INT UNSIGNED NULL,
   service_id           INT UNSIGNED NULL COMMENT 'Layanan rujukan',
   closed_reason        TEXT         NULL,
@@ -93,6 +102,7 @@ CREATE TABLE reports (
   KEY idx_reports_status (status, urgency, created_at),
   KEY idx_reports_assigned (assigned_to, status),
   KEY idx_reports_user (user_id),
+  KEY idx_reports_child (is_child, status),            -- Area A (sdg5-improvements)
   CONSTRAINT fk_reports_user     FOREIGN KEY (user_id)     REFERENCES users (id)    ON DELETE SET NULL,
   CONSTRAINT fk_reports_assignee FOREIGN KEY (assigned_to) REFERENCES users (id)    ON DELETE SET NULL,
   CONSTRAINT fk_reports_service  FOREIGN KEY (service_id)  REFERENCES services (id) ON DELETE SET NULL
@@ -121,6 +131,54 @@ CREATE TABLE report_status_logs (
   KEY idx_statuslog_report (report_id, created_at),
   CONSTRAINT fk_statuslog_report FOREIGN KEY (report_id) REFERENCES reports (id) ON DELETE CASCADE,
   CONSTRAINT fk_statuslog_actor  FOREIGN KEY (actor_id)  REFERENCES users (id)   ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Area A (sdg5-improvements): persetujuan korban atas tindak lanjut laporan saksi (Req 5.7, 5.8).
+-- Satu baris per laporan. Tidak menyimpan identitas korban maupun isi laporan;
+-- companion_id adalah pendamping yang mencatat persetujuan, bukan penyintas.
+CREATE TABLE report_consents (
+  id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  report_id    INT UNSIGNED NOT NULL,
+  companion_id INT UNSIGNED NOT NULL COMMENT 'Pendamping yang mencatat persetujuan',
+  created_at   DATETIME     NOT NULL,
+  UNIQUE KEY uq_consent_report (report_id),
+  CONSTRAINT fk_consent_report FOREIGN KEY (report_id)    REFERENCES reports (id) ON DELETE CASCADE,
+  -- Tanpa ON DELETE: catatan siapa yang mencatat persetujuan tidak boleh hilang.
+  CONSTRAINT fk_consent_user   FOREIGN KEY (companion_id) REFERENCES users (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Area A (sdg5-improvements): pengingat kasus mendesak yang dibuat bin/reminders.php (Req 6.3 sampai 6.6).
+-- Satu baris per kasus per tipe per periode SLA. UNIQUE (report_id, type, period) plus INSERT IGNORE
+-- membuat run berulang tidak menambah baris maupun notifikasi (Req 6.6).
+-- Tidak menyimpan kronologi, isi notifikasi, penerima, maupun IP (Req 10.2, 10.4).
+CREATE TABLE report_reminders (
+  id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  report_id  INT UNSIGNED NOT NULL,
+  type       ENUM('danger_unanswered','no_reply') NOT NULL COMMENT 'Sama dengan ReminderPlanner::TYPES',
+  period     INT UNSIGNED NOT NULL COMMENT 'Periode SLA dari Sla::periodIndex, mulai 0',
+  created_at DATETIME     NOT NULL,
+  UNIQUE KEY uq_reminder (report_id, type, period),
+  CONSTRAINT fk_reminder_report FOREIGN KEY (report_id) REFERENCES reports (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Area A (sdg5-improvements): email yang gagal dikirim, dicoba ulang bin/mail-queue.php (Req 6.11, 6.12).
+-- failed_retries menghitung percobaan ULANG yang gagal: baris baru masuk dengan 0 dan
+-- last_attempt_at = waktu percobaan pertama yang gagal, jadi nilai 5 berarti email dijatuhkan
+-- (lihat MailQueue::decide). Alamat dan isi disimpan terenkripsi AES-256-GCM karena bisa memuat
+-- data pribadi (Req 10.3). Tanpa kolom user id, IP, atau report id: antrean tidak boleh menjadi
+-- jalan untuk menghubungkan email ke laporan anonim (Req 10.4). Subjek tidak terenkripsi karena
+-- dibaca pengelola saat memeriksa antrean, dan MailPolicy::containsForbidden sudah memastikan
+-- subjek tanpa kode laporan, PIN, maupun kronologi (Req 6.13).
+CREATE TABLE mail_queue (
+  id              INT UNSIGNED     AUTO_INCREMENT PRIMARY KEY,
+  to_email_enc    TEXT             NOT NULL COMMENT 'Alamat penerima, AES-256-GCM',
+  type            VARCHAR(40)      NOT NULL COMMENT 'Tipe MailPolicy: password_reset|invitation|general',
+  subject         VARCHAR(190)     NOT NULL,
+  body_enc        MEDIUMTEXT       NOT NULL COMMENT 'Isi email, AES-256-GCM',
+  failed_retries  TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Percobaan ulang yang gagal, 0 sampai MailQueue::MAX_RETRY',
+  last_attempt_at DATETIME         NOT NULL,
+  created_at      DATETIME         NOT NULL,
+  KEY idx_mail_due (last_attempt_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE case_notes (

@@ -6,7 +6,15 @@ final class AdminServiceController
 {
     public function index(): void
     {
-        View::show('pages/admin/services', ['title' => 'Layanan | Admin Haven', 'active' => 'layanan', 'services' => Service::all()], 'app');
+        $services = Service::all();
+        View::show('pages/admin/services', [
+            'title' => 'Layanan | Admin Haven',
+            'active' => 'layanan',
+            'services' => $services,
+            // Aturan verifikasi murni: hari ini disuntikkan dari sini (Req 1.7, 1.9).
+            'today' => new DateTimeImmutable('now'),
+            'unverifiedCounts' => ServiceRules::unverifiedCounts($services),
+        ], 'app');
     }
 
     public function create(): void
@@ -52,12 +60,19 @@ final class AdminServiceController
     public function store(): void
     {
         $in = self::input();
-        $errors = Service::validationErrors($in);
+        $errors = Service::validationErrors($in, new DateTimeImmutable('now'));
         if ($errors) {
+            // Tidak ada baris yang ditulis; nilai lama kembali ke form (Req 1.4, 1.5).
             back_with('/admin/layanan/baru', $errors, $in);
         }
+        $verified = ServiceRules::nextVerified([], $in);
         $id = Service::save($in, null);
-        Audit::log('service.save', 'service', (string) $id, 'Menambah ' . $in['name']);
+        Audit::log(
+            'service.save',
+            'service',
+            (string) $id,
+            'verifikasi: ' . Service::verifyLabel(false) . '→' . Service::verifyLabel($verified) . ' · menambah ' . $in['name']
+        );
         Session::flash('success', 'Layanan ' . $in['name'] . ' ditambahkan.');
         redirect('/admin/layanan');
     }
@@ -66,14 +81,30 @@ final class AdminServiceController
     {
         $s = self::loadOr404((int) $p['id']);
         $in = self::input();
-        $errors = Service::validationErrors($in);
+        $errors = Service::validationErrors($in, new DateTimeImmutable('now'));
         if ($errors) {
+            // Simpanan ditolak: baris lama tetap utuh (Req 1.4, 1.5).
             back_with('/admin/layanan/' . $s['id'], $errors, $in);
         }
-        Service::save($in, (int) $s['id']);
-        $verifiedNow = $in['is_verified'] && !(int) $s['is_verified'];
-        Audit::log('service.save', 'service', (string) $s['id'], ($verifiedNow ? 'Memverifikasi ' : 'Mengubah ') . $in['name']);
-        Session::flash('success', 'Layanan disimpan.' . ($verifiedNow ? ' Kontaknya sekarang tampil di direktori publik.' : ''));
+        $was = (bool) (int) $s['is_verified'];
+        $verified = ServiceRules::nextVerified($s, $in);
+        Service::save($in, (int) $s['id'], $s);
+        Audit::log(
+            'service.save',
+            'service',
+            (string) $s['id'],
+            'verifikasi: ' . Service::verifyLabel($was) . '→' . Service::verifyLabel($verified) . ' · ' . $in['name']
+        );
+
+        $note = match (true) {
+            // Kontak layanan terverifikasi berubah, jadi statusnya kembali perlu dicek (Req 1.6).
+            $was && !$verified && !empty($in['is_verified']) => ' Nomornya berubah, jadi layanan ini kembali berlabel "'
+                . ServiceRules::UNVERIFIED_LABEL . '" sampai kamu menandainya terverifikasi lagi.',
+            !$was && $verified => ' Kontaknya sekarang tampil di direktori publik.',
+            $was && !$verified => ' Kontaknya tidak lagi tampil di direktori publik.',
+            default => '',
+        };
+        Session::flash('success', 'Layanan disimpan.' . $note);
         redirect('/admin/layanan');
     }
 

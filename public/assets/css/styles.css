@@ -557,8 +557,60 @@ html { scrollbar-color: var(--ink-3) var(--cream); }
 .site-footer a:not(.btn):not(.wordmark):hover { color: var(--paper); text-decoration: underline; text-underline-offset: 4px; }
 .footer-bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 24px; border-top: 1px solid var(--line-dark); font-size: 0.875rem; }
 .footer-bottom ul { display: flex; gap: 24px; }
+.footer-limit { max-width: 72ch; }
+
+/* Pemilih bahasa dan mode tampilan (Req 8.6, 8.13). Dua formulir POST biasa,
+   jadi bagian ini tetap bisa dipakai tanpa JavaScript. */
+.prefs { display: flex; flex-wrap: wrap; gap: 16px 32px; padding-block: 24px; border-top: 1px solid var(--line-dark); }
+.prefs fieldset { border: 0; margin: 0; padding: 0; }
+.pref-label { display: block; margin-bottom: 8px; padding: 0; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--yellow); }
+.pref-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.pref-btn {
+  min-height: 44px; padding: 0 16px;
+  /* Garis tepi tombol perlu kontras minimal 3:1 terhadap latar gelap (Req 8.1). */
+  border: 1px solid rgb(255 255 255 / 0.45); border-radius: 999px;
+  background: transparent; color: inherit; font-size: 0.875rem;
+}
+.pref-btn:hover { border-color: var(--paper); color: var(--paper); }
+.pref-btn[aria-current="true"] { background: var(--yellow); border-color: var(--yellow); color: var(--ink); font-weight: 700; }
+.pref-hint { flex: 1 1 24ch; max-width: 60ch; font-size: 0.8125rem; }
+
+/* Pemilih yang sama di sidebar aplikasi, di atas latar terang. */
+.prefs-light { flex-direction: column; gap: 16px; padding-block: 20px 0; margin-top: 16px; border-top: 1px solid var(--line); }
+.prefs-light .pref-label { color: var(--ink-3); }
+.prefs-light .pref-btn { border-color: var(--line); }
+.prefs-light .pref-btn:hover { border-color: var(--ink); color: var(--ink); }
+.prefs-light .pref-hint { color: var(--ink-3); }
+
+/* Panggilan darurat di form lapor dan halaman lacak (Req 8.12). Selalu terbuka:
+   tidak ada tombol "tampilkan" dan tidak ada JavaScript yang perlu jalan. */
+.emergency { border: 2px solid var(--ink); border-radius: 6px; background: var(--yellow-soft); padding: clamp(18px, 3vw, 24px); }
+.emergency-title { display: flex; align-items: center; gap: 10px; font-family: var(--font-serif); font-weight: 500; font-size: 1.25rem; line-height: 1.25; }
+.emergency-title .icon { width: 20px; height: 20px; }
+.emergency-lede { margin-top: 10px; font-size: 0.9375rem; color: var(--ink-2); }
+.emergency-list { display: grid; gap: 10px; margin-top: 16px; }
+.emergency-call {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 56px; padding: 10px 16px;
+  border: 1px solid var(--ink); border-radius: var(--radius);
+  background: var(--paper); text-decoration: none;
+}
+.emergency-call:hover { background: var(--ink); color: var(--paper); }
+.emergency-name { font-size: 0.9375rem; font-weight: 700; }
+.emergency-num { font-size: 1.375rem; font-weight: 700; letter-spacing: 0.02em; }
+.emergency-note { margin-top: 16px; font-size: 0.8125rem; color: var(--ink-2); }
 
 @media (max-width: 760px) { .footer-cols { grid-template-columns: repeat(2, 1fr); } }
+
+/* Layar sempit: tidak ada scroll horizontal sampai 320px, dan teks panjang
+   seperti kode laporan tetap terpotong di dalam kolomnya (Req 8.4). */
+@media (max-width: 420px) {
+  :root { --gutter: 16px; }
+  .footer-top, .footer-bottom { flex-direction: column; align-items: flex-start; }
+  .emergency-call { flex-wrap: wrap; }
+}
+.container, .footer-cols > *, .prefs > * { min-width: 0; }
+.mono, .case-code, .emergency-num { overflow-wrap: anywhere; }
 
 /* ---------- Motion ---------- */
 @media (prefers-reduced-motion: reduce) {

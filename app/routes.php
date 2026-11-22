@@ -8,6 +8,10 @@ return static function (Router $r): void {
     $r->get('/tentang', [PageController::class, 'about']);
     $r->get('/tips-aman', [PageController::class, 'safety']);
 
+    // Bahasa dan mode tampilan: endpoint publik, CSRF di App::run, rate limit di controller (Req 8.6, 8.13)
+    $r->post('/bahasa', [PrefController::class, 'setLang']);
+    $r->post('/mode', [PrefController::class, 'setMode']);
+
     // Module 1: authentication
     $r->get('/masuk', [AuthController::class, 'showLogin'], ['guest']);
     $r->post('/masuk', [AuthController::class, 'login'], ['guest']);
@@ -35,6 +39,7 @@ return static function (Router $r): void {
     $r->get('/admin/pengguna', [AdminUserController::class, 'index'], ['role:admin']);
     $r->post('/admin/pengguna', [AdminUserController::class, 'store'], ['role:admin']);
     $r->post('/admin/pengguna/{id}/status', [AdminUserController::class, 'setStatus'], ['role:admin']);
+    $r->post('/admin/pengguna/{id}/terlatih-anak', [AdminUserController::class, 'setChildTrained'], ['role:admin']);
     $r->post('/admin/pengguna/{id}/reset', [AdminUserController::class, 'sendReset'], ['role:admin']);
 
     // Module 2: reporting
@@ -59,6 +64,8 @@ return static function (Router $r): void {
     $r->get('/pendamping/kasus', [CompanionCaseController::class, 'index'], ['role:companion']);
     $r->get('/pendamping/kasus/{code}', [CompanionCaseController::class, 'show'], ['role:companion']);
     $r->post('/pendamping/kasus/{code}/status', [CompanionCaseController::class, 'updateStatus'], ['role:companion']);
+    // Persetujuan korban untuk laporan saksi, syarat sebelum status "dirujuk" (Req 5.7, 5.8).
+    $r->post('/pendamping/kasus/{code}/persetujuan', [CompanionCaseController::class, 'recordConsent'], ['role:companion']);
     $r->post('/pendamping/kasus/{code}/catatan', [CompanionCaseController::class, 'addNote'], ['role:companion']);
 
     // Module 5: scheduling
@@ -103,6 +110,8 @@ return static function (Router $r): void {
     $r->get('/admin/artikel/{id}/pratinjau', [AdminArticleController::class, 'preview'], ['role:admin']);
     $r->post('/admin/artikel/{id}/hapus', [AdminArticleController::class, 'delete'], ['role:admin']);
 
-    // Module 10: statistics (JSON for the admin charts)
+    // Module 10: statistics (JSON for the admin charts) and the anonymous aggregate export
     $r->get('/api/statistik', [DashboardController::class, 'adminApi'], ['role:admin']);
+    // Peran non-admin ditolak 403 di middleware, sebelum satu byte CSV dibuat (Req 7.8).
+    $r->post('/admin/statistik/ekspor', [StatsController::class, 'export'], ['role:admin']);
 };

@@ -231,6 +231,8 @@ legend.label { padding: 0; margin-bottom: 8px; }
 .badge-plain::before { display: none; }
 .badge-verify { background: var(--amber-soft); color: var(--amber); }
 .badge-verify::before { display: none; }
+/* Lewat batas waktu balasan (Req 6.8), dipakai di antrean admin. */
+.badge-sla { background: var(--red-soft); color: var(--red); }
 .badge-ok { background: var(--green-soft); color: var(--green); }
 
 /* ---------- Timeline ---------- */
@@ -304,13 +306,15 @@ legend.label { padding: 0; margin-bottom: 8px; }
 .search .input { padding-left: 44px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
+  display: inline-flex; align-items: center; justify-content: center;
   height: 40px; padding: 0 16px;
-  border: 1.5px solid var(--ink); border-radius: 999px; background: transparent;
+  border: 1.5px solid var(--line); border-radius: 999px; background: var(--paper);
   font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-  transition: background-color 0.15s, color 0.15s;
+  text-decoration: none; color: var(--ink-2);
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
 }
-.chip:hover { background: var(--yellow-soft); }
-.chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.chip:hover { background: var(--cream); border-color: var(--ink-3); color: var(--ink); }
+.chip[aria-pressed="true"], .chip[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--paper); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .result-count { font-family: var(--font-mono); font-size: 0.875rem; color: var(--ink-3); }
 
 /* ---------- Pagination ---------- */
@@ -359,22 +363,41 @@ legend.label { padding: 0; margin-bottom: 8px; }
 @keyframes toast-in { from { opacity: 0; transform: translateY(10px); filter: blur(4px); } }
 @media (max-width: 560px) { .toast-region { bottom: 84px; } }
 
-/* ---------- Quick exit ---------- */
+/* ---------- Quick exit (Req 8.15 sampai 8.20) ----------
+   Dua bentuk. Berlabel di form lapor, halaman kasus, dan halaman lacak, tempat
+   pengguna memang perlu melihat jalan keluarnya. Ikon 44x44 di halaman publik
+   lain, dengan label yang muncul saat kursor di atasnya dan saat fokus papan
+   tombol. Warnanya tenang, bukan pil hitam dengan kuning menyala, supaya tombol
+   ini tidak menarik perhatian orang di sekitar pengguna. */
 .quick-exit {
-  position: fixed; right: 20px; bottom: 20px; z-index: 95;
-  display: inline-flex; align-items: center; gap: 10px;
-  height: 52px; padding: 0 18px 0 16px;
-  border: 2px solid var(--yellow); border-radius: 999px;
-  background: var(--ink); color: var(--paper);
-  font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-  box-shadow: 0 12px 28px -10px rgb(0 0 0 / 0.55);
-  transition: background-color 0.15s, transform 0.2s var(--ease-out);
+  position: fixed; right: 16px; bottom: 16px; z-index: 95;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-width: 44px; min-height: 44px;
+  border: 1px solid var(--ink); border-radius: 999px;
+  background: var(--paper); color: var(--ink);
+  font-size: 0.875rem; font-weight: 700; text-decoration: none;
+  box-shadow: 0 6px 18px -8px rgb(28 27 25 / 0.45);
+  transition: background-color 0.15s, color 0.15s;
 }
-.quick-exit:hover { background: #000; transform: translateY(-1px); }
-.quick-exit .icon { width: 20px; height: 20px; color: var(--yellow); }
-.quick-exit kbd { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0; text-transform: none; padding: 3px 6px; border-radius: 3px; background: rgb(255 255 255 / 0.14); }
-.quick-exit:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
-@media (max-width: 560px) { .quick-exit { right: 12px; bottom: 12px; height: 48px; } .quick-exit kbd { display: none; } }
+.quick-exit .icon { width: 20px; height: 20px; }
+.quick-exit:hover { background: var(--ink); color: var(--paper); }
+.quick-exit:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+.quick-exit-labeled { padding: 0 16px 0 14px; }
+
+/* Ikon saja: labelnya tetap ada di DOM, hanya belum terlihat, dan nama
+   aksesibelnya datang dari `aria-label` sehingga sama di semua keadaan. */
+.quick-exit-icon { width: 44px; height: 44px; padding: 0; }
+.quick-exit-icon .quick-exit-label {
+  position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%);
+  padding: 6px 10px; border-radius: 4px;
+  background: var(--ink); color: var(--paper);
+  font-size: 0.8125rem; font-weight: 700; white-space: nowrap;
+  opacity: 0; visibility: hidden; transition: opacity 0.15s;
+}
+.quick-exit-icon:hover .quick-exit-label,
+.quick-exit-icon:focus .quick-exit-label,
+.quick-exit-icon:focus-visible .quick-exit-label { opacity: 1; visibility: visible; }
+@media (max-width: 560px) { .quick-exit { right: 12px; bottom: 12px; } }
 
 /* ---------- Dialog ---------- */
 dialog.modal { width: min(480px, calc(100% - 32px)); padding: 0; border: 0; border-radius: 8px; color: var(--ink); box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.5); }
@@ -691,7 +714,7 @@ dialog.modal[open] { animation: modal-in 0.35s var(--ease-out); }
 .service-meta { grid-column: 1; display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 0.9375rem; color: var(--ink-2); }
 .service-meta span { display: inline-flex; align-items: center; gap: 7px; }
 .service-meta .icon { width: 16px; height: 16px; color: var(--ink-3); flex: none; }
-.service-actions { grid-column: 2; grid-row: 1 / span 3; display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+.service-actions { grid-column: 2; display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
 .service-tags { grid-column: 1; display: flex; flex-wrap: wrap; gap: 6px; }
 @media (max-width: 680px) { .service { grid-template-columns: 1fr; } .service-actions { grid-column: 1; grid-row: auto; flex-direction: row; flex-wrap: wrap; } }
 
@@ -748,4 +771,7 @@ dialog.modal[open] { animation: modal-in 0.35s var(--ease-out); }
 .footer-emergency a:hover { text-decoration: underline; }
 .footer-note { font-size: 0.9375rem; line-height: 1.6; }
 .footer-bottom p { margin: 0; }
+/* Nomor darurat di pernyataan batas layanan harus terbaca sebagai tautan (Req 8.1). */
+.footer-limit a { color: var(--yellow); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.emergency-note a { color: var(--ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 760px) { .footer-top { flex-direction: column; align-items: flex-start; } }

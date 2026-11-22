@@ -1,9 +1,14 @@
 <?php
-/** @var array $report  @var ?array $companion  @var array $companions  @var array $logs  @var array $access  @var int $attachCount */
+/** @var array $report  @var ?array $companion  @var array $companions  @var array $assignment  @var array $logs  @var array $access  @var int $attachCount */
 $s = $report['status'];
 $canAssign = in_array($s, ['diterima', 'ditinjau'], true);
 $canReassign = in_array($s, CaseWorkflow::ACTIVE, true);
 $canClose = in_array($s, ['diterima', 'ditinjau'], true);
+// Req 5.6: laporan saksi diberi label jelas, termasuk di halaman pemilahan admin.
+$byWitness = (string) ($report['reporter_type'] ?? 'korban') === ConsentGuard::WITNESS;
+// Req 4.8 sampai 4.10: kasus anak dan daftar kandidat dari Assignment.
+$isChild = (bool) $report['is_child'];
+$needsConfirm = !empty($assignment['needsConfirm']);
 ?>
 <a class="back-link" href="<?= e(url('/admin/antrean')) ?>"><?= icon('arrow-left') ?> Antrean kasus</a>
 <div class="case-head">
@@ -12,6 +17,8 @@ $canClose = in_array($s, ['diterima', 'ditinjau'], true);
     <?= status_badge($s) ?>
     <?= urgency_badge($report['urgency'], 'Urgensi ') ?>
     <?php if ((int) $report['in_danger']): ?><span class="badge" data-urgency="tinggi">Menyatakan dalam bahaya</span><?php endif; ?>
+    <?php if ($isChild): ?><span class="badge" data-urgency="tinggi">Anak</span><?php endif; ?>
+    <?php if ($byWitness): ?><span class="badge">Dilaporkan oleh saksi</span><?php endif; ?>
     <div class="case-meta">
       <span><?= icon('user') ?><?= $report['user_id'] ? 'Berakun' : 'Anonim' ?></span>
       <span><?= icon('clock') ?>Masuk <?= e(id_date($report['created_at'], true)) ?></span>
@@ -82,17 +89,37 @@ $canClose = in_array($s, ['diterima', 'ditinjau'], true);
               <?php endforeach; ?>
             </div>
           </fieldset>
+          <?php if (!empty($assignment['warning'])): ?>
+            <div class="alert alert-warn" role="alert">
+              <?= icon('alert') ?>
+              <div><strong>Tidak ada pendamping terlatih kasus anak di wilayah laporan.</strong>Daftar di bawah berisi semua pendamping aktif, yang wilayahnya sama ditampilkan lebih dulu. Penugasan baru tersimpan setelah kamu mencentang konfirmasi.</div>
+            </div>
+          <?php endif; ?>
           <div class="field">
             <label class="label" for="pd">Pendamping</label>
             <select class="select" id="pd" name="pendamping" required data-msg="Pilih pendamping yang akan menangani."<?= field_aria('pendamping', 'pd-hint') ?>>
               <option value="">Pilih pendamping</option>
               <?php foreach ($companions as $c): ?>
-                <option value="<?= (int) $c['id'] ?>"<?= selected(old('pendamping', (string) $report['assigned_to']), (string) $c['id']) ?>><?= e($c['name']) ?> · <?= (int) $c['active'] ?> kasus aktif<?= $c['region'] ? ' · ' . e($c['region']) : '' ?></option>
+                <option value="<?= (int) $c['id'] ?>"<?= selected(old('pendamping', (string) $report['assigned_to']), (string) $c['id']) ?>><?= e($c['name']) ?> · <?= (int) $c['active'] ?> kasus aktif<?= $c['region'] ? ' · ' . e($c['region']) : '' ?><?= !empty($c['child_trained']) ? ' · terlatih kasus anak' : '' ?></option>
               <?php endforeach; ?>
             </select>
-            <p class="hint" id="pd-hint">Pendamping di wilayah yang sama ditampilkan lebih dulu, lalu yang bebannya paling ringan.</p>
+            <p class="hint" id="pd-hint">
+              <?php if ($isChild && !$needsConfirm): ?>
+                Kasus anak hanya ditawarkan ke pendamping terlatih kasus anak di wilayah laporan, diurutkan dari beban paling ringan.
+              <?php else: ?>
+                Pendamping di wilayah yang sama ditampilkan lebih dulu, lalu yang bebannya paling ringan.
+              <?php endif; ?>
+            </p>
             <?= field_error('pendamping') ?>
+            <?php if (!$companions): ?>
+              <p class="small muted">Belum ada pendamping aktif yang bisa ditugaskan. Tambahkan atau aktifkan pendamping di <a href="<?= e(url('/admin/pengguna')) ?>">Pengguna</a> lebih dulu.</p>
+            <?php endif; ?>
           </div>
+          <?php if ($needsConfirm): ?>
+            <div class="field">
+              <label class="check"><input type="checkbox" name="confirm" value="1" required data-msg="Centang konfirmasi penugasan kasus anak."> <span>Saya tahu pendamping ini belum terlatih kasus anak di wilayah laporan, dan saya tetap menugaskannya.</span></label>
+            </div>
+          <?php endif; ?>
           <div class="field">
             <label class="label" for="nt">Catatan untuk pendamping <span class="opt">(opsional)</span></label>
             <textarea class="textarea textarea-sm" id="nt" name="catatan" maxlength="500" placeholder="Contoh: Penyintas menyatakan dalam bahaya. Sapa dalam 1 jam."><?= e(old('catatan')) ?></textarea>
